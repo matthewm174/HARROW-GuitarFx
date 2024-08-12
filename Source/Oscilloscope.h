@@ -14,12 +14,10 @@ template <typename SampleType>
 class AudioBufferQueue
 {
 public:
-    //==============================================================================
     static constexpr size_t order = 9;
     static constexpr size_t bufferSize = 1U << order;
     static constexpr size_t numBuffers = 5;
 
-    //==============================================================================
     void push(const SampleType* dataToPush, size_t numSamples)
     {
         jassert(numSamples <= bufferSize);
@@ -36,7 +34,6 @@ public:
         abstractFifo.finishedWrite(size1);
     }
 
-    //==============================================================================
     void pop(SampleType* outputBuffer)
     {
         int start1, size1, start2, size2;
@@ -52,7 +49,6 @@ public:
     }
 
 private:
-    //==============================================================================
     juce::AbstractFifo abstractFifo{ numBuffers };
     std::array<std::array<SampleType, bufferSize>, numBuffers> buffers;
 };
@@ -120,8 +116,6 @@ public:
     }
     void paint(juce::Graphics& g) override
     {
-        /*g.fillAll(juce::Colours::none);*/
-        //g.setColour(juce::Colours::white);
 
         auto area = getLocalBounds();
 

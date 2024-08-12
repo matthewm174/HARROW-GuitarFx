@@ -9,32 +9,31 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "DSP/Distortion.h"
-#include "DSP/CabSim.h"
-#include "DSP/Oscilloscope.h"
-#include "DSP/Reverb.h"
+#include "Distortion.h"
+#include "CabSim.h"
+#include "Oscilloscope.h"
+#include "Reverb.h"
+#include "TubePre.h"
+#include "Delay.h"
 //==============================================================================
-/**
-*/
-class DistAdvAudioProcessor  : public juce::AudioProcessor, 
-    juce::AudioProcessorValueTreeState::Listener
+
+class DistAdvAudioProcessor 
+    : public juce::AudioProcessor
 {
 public:
-    //==============================================================================
+
+
     DistAdvAudioProcessor();
     ~DistAdvAudioProcessor() override;
 
-    //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-    juce::AudioProcessorValueTreeState& getAudioProcessorValueTreeState();
+#ifndef JucePlugin_PreferredChannelConfigurations
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+#endif
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
-
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -51,43 +50,53 @@ public:
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
+    void changeProgramName(int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
-
-    juce::AudioProcessorValueTreeState _treeState;
+    void getStateInformation(juce::MemoryBlock& destData) override;
+    void setStateInformation(const void* data, int sizeInBytes) override;
 
     AudioBufferQueue<float>& getAudioBufferQueue() noexcept { return audioBufferQueue; }
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void setDist(float newDist);
+    void setMix(float newMix);
+    void setCeiling(float newDist);
+    void setThresh(float newThresh);
+
     void setReverbParameters(const juce::dsp::Reverb::Parameters& params);
+    void bypassReverb();
+    void bypassCab();
+    void bypassDist();
+    void bypassTube();
+    void bypassDelay();
+    void setCab(juce::File f);
+    juce::File root, saveFile;
+    void updateParameters(int selection);
+    void setTubeDrive(float tubedr);
+    void setTubeBias(float tubedr);
+    void setTubeMix(float tubedr);
+    void setTubeInputGain(float tubedr);
+    void setTubeOutputGain(float tubedr);
+    void setDelay(float delaytime);
+    void setDelayFb(float delaytime);
+    void setDelayWet(float delaytime);
 
 
 private:
-    //==============================================================================
-    void parameterChanged(const juce::String& parameterID, float newValue) override;
-    void updateParameters();
+    // Static chain of effects, might makek this dynamic eventually with graphs
+    juce::dsp::ProcessorChain<Distortion<float>, TubePre<float>, CabSimulator<float>, ReverbEffect<float>, DelayEffect<float> > processorChain;
 
-
-    using DistortionProcessor = juce::dsp::ProcessorChain<Distortion<float>, CabSimulator<float>, ReverbEffect<float>>;
-
-    DistortionProcessor processorChain;
-
-    //JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MyAudioProcessor)
     AudioBufferQueue<float> audioBufferQueue;
 
     float distLvl = 1.0f;
+    juce::dsp::Oscillator<float> oscillator;
 
 
     ScopeDataCollector<float> scopeDataCollector{ audioBufferQueue };
 
-    //Distortion<float> _distortionModule;
-
-    //juce::dsp::ProcessorChain<Distortion<float>, CabSimulator<float>> fxChain;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DistAdvAudioProcessor);
+
+
 };

@@ -1,6 +1,3 @@
-#ifndef REVERBEFFECT_H_INCLUDED
-#define REVERBEFFECT_H_INCLUDED
-
 #include <JuceHeader.h>
 
 template <typename SampleType>
@@ -17,5 +14,3 @@ public:
 private:
     juce::dsp::Reverb reverb;
 };
-
-#endif // REVERBEFFECT_H_INCLUDED
