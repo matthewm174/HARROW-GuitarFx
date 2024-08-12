@@ -2,6 +2,7 @@ Starting this project to learn some things about audio processing via Juce (and 
 <br /><br />
 TODOS:<br />
 -implement Lagrange 3rd order interpolation for the delayline to reduce audio artifacts when changing time<br />
+-implement eq<br />
 -touch up graphics by learning look and feel<br />
 -switch from processorchain to audiograph for flexibility<br />
 -figure out optimized ranges for sliders (you can get some weird effects with some of the current ranges, feature or bug, you decide)<br />
