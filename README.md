@@ -11,7 +11,7 @@ Helpful Links
 https://wiki.analog.com/_media/resources/tools-software/sharc-audio-module/baremetal/audio_processing.zip
 <br />
 Big thanks to The Audio Programmer's line of Youtube videos as well!
-<br />
+<br /><br />
 Quick Video of the plugin in action:
 
 https://github.com/user-attachments/assets/82fb000d-e112-4106-b0f0-ebb069ba8fc5
