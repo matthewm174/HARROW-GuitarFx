@@ -7,7 +7,9 @@ TODOS:<br />
 -switch from processorchain to audiograph for flexibility<br />
 -figure out optimized ranges for sliders (you can get some weird effects with some of the current ranges, feature or bug, you decide)<br />
 <br />
-Helpful Links
+Helpful Links<br/>
+<br />
+https://docs.juce.com/master/index.html
 <br />
 https://wiki.analog.com/_media/resources/tools-software/sharc-audio-module/baremetal/audio_processing.zip
 <br />
