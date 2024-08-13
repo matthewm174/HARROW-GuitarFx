@@ -45,6 +45,8 @@ private:
     juce::Slider tubeOG;
     juce::Slider tubeDrive;
 
+    juce::Slider gainKnob;
+
 
 
     juce::Slider delayTime;

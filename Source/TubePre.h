@@ -37,14 +37,15 @@ public:
             outputBlock.copyFrom(inputBlock);
             return;
         }
-
         for (size_t channel = 0; channel < numChannels; ++channel)
         {
             for (size_t sample = 0; sample < numSamples; ++sample)
             {
-                auto* input = inputBlock.getChannelPointer(channel);
-                auto* output = outputBlock.getChannelPointer(channel);
 
+                auto* input = inputBlock.getChannelPointer(0);
+                auto* output = outputBlock.getChannelPointer(channel);
+                //auto* output = outputBlock.getChannelPointer(channel);
+                //output[sample] = processSamples(input[sample], channel);
                 output[sample] = processSamples(input[sample], channel);
             }
         }

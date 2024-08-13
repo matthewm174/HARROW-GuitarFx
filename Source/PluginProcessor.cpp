@@ -16,7 +16,7 @@ DistAdvAudioProcessor::DistAdvAudioProcessor()
     : AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
 #if ! JucePlugin_IsSynth
-        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+        .withInput("Input", juce::AudioChannelSet::mono(), true)
 #endif
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
@@ -198,6 +198,11 @@ void DistAdvAudioProcessor::setStateInformation(const void* data, int sizeInByte
 void DistAdvAudioProcessor::setDist(float gain)
 {
     processorChain.get<0>().setDrive(gain);
+}
+
+void DistAdvAudioProcessor::setGainKnob(float gain)
+{
+    processorChain.get<0>().setGainKnobVal(gain);
 }
 
 void DistAdvAudioProcessor::setMix(float newMix)

@@ -30,12 +30,12 @@ void ReverbEffect<SampleType>::reset()
 template <typename SampleType>
 void ReverbEffect<SampleType>::process(juce::dsp::ProcessContextReplacing<float>& context)
 {
-   
-    if (context.isBypassed)
-    {
-        outputBlock.copyFrom(inputBlock);
-        return;
-    }
+    //const auto& inputBlock = context.getInputBlock();
+    //if (context.isBypassed)
+    //{
+    //    outputBlock.copyFrom(inputBlock);
+    //    return;
+    //}
     reverb.process(context);
 }
 

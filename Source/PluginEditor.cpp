@@ -21,6 +21,14 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     setSize(500, 500);
     addAndMakeVisible(scopeComponent);
 
+    gainKnob.setSliderStyle(juce::Slider::Rotary);
+    gainKnob.setRange(1.0, 11.0);
+    gainKnob.setValue(1.0);
+    gainKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    gainKnob.addListener(this);
+
+
+    addAndMakeVisible(gainKnob);
 
 
     distSelect.addItem("EGGIE", 1);
@@ -30,7 +38,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     distSelect.addListener(this);
     addAndMakeVisible(distSelect);
 
-    driveSlider.setRange(0.0, 100.0);
+    driveSlider.setRange(0.0, 80.0);
     driveSlider.setValue(1.0);
     driveSlider.addListener(this);
     addAndMakeVisible(driveSlider);
@@ -63,34 +71,34 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     addAndMakeVisible(reverbDampingSlider);
 
 
-    tubeMix.setRange(0.0, 1.0);
-    tubeMix.setValue(0.5);
+    tubeMix.setRange(1.0, 0.0);
+    tubeMix.setValue(1.0);
     tubeMix.addListener(this);
     addAndMakeVisible(tubeMix);
 
-    tubeIG.setRange(0.0, 5.0);
-    tubeIG.setValue(1);
+    tubeIG.setRange(0.0, 10.0);
+    tubeIG.setValue(1.0);
     tubeIG.addListener(this);
     addAndMakeVisible(tubeIG);
 
-    tubeOG.setRange(0.0, 5.0);
-    tubeOG.setValue(1);
+    tubeOG.setRange(0.0, 10.0);
+    tubeOG.setValue(1.0);
     tubeOG.addListener(this);
     addAndMakeVisible(tubeOG);
 
-    tubeBias.setRange(0.0, 5.0);
-    tubeBias.setValue(1);
+    tubeBias.setRange(-3.0, 3.0);
+    tubeBias.setValue(0.0);
     tubeBias.addListener(this);
     addAndMakeVisible(tubeBias);
 
     tubeDrive.setRange(0.0, 5.0);
-    tubeDrive.setValue(1);
+    tubeDrive.setValue(1.0);
     tubeDrive.addListener(this);
     addAndMakeVisible(tubeDrive);
 
 
-    delayTime.setRange(0.0, 10000.0);
-    delayTime.setValue(1);
+    delayTime.setRange(0.0, 3000.0);
+    delayTime.setValue(1.0);
     delayTime.addListener(this);
     addAndMakeVisible(delayTime);
 
@@ -231,6 +239,7 @@ void DistAdvAudioProcessorEditor::resized()
     auto area = getLocalBounds();
 
     distSelect.setBounds(20, 420, 100, 30);
+    gainKnob.setBounds(240, 420, 80, 80);
 
     scopeComponent.setBounds(0, 0, area.getWidth(), 100);
 
@@ -291,7 +300,9 @@ void DistAdvAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
         //params.width = reverb
         audioProcessor.setReverbParameters(params);
     }
-
+    if (slider == &gainKnob) {
+        audioProcessor.setGainKnob(gainKnob.getValue());
+    }
     if (slider == &driveSlider) {
         audioProcessor.setDist(driveSlider.getValue());
     }

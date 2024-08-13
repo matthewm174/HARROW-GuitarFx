@@ -20,7 +20,7 @@ void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
     _sampleRate = spec.sampleRate;
     _dcFilter.prepare(spec);
     _dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);
-    _dcFilter.setCutoffFrequency(20.0);
+    _dcFilter.setCutoffFrequency(50.0);
     reset();
 }
 
@@ -54,6 +54,12 @@ void Distortion<SampleType>::setDrive(SampleType newDrive) {
     _input.setTargetValue(newDrive);
     _gainDB.setTargetValue(newDrive);
     _rawGain.setTargetValue(juce::Decibels::decibelsToGain(newDrive));
+}
+
+template<typename SampleType>
+void Distortion<SampleType>::setGainKnobVal(SampleType newGain)
+{
+    gainKnobVal.setTargetValue(newGain);
 }
 
 template <typename SampleType>
@@ -107,7 +113,7 @@ void Distortion<SampleType>::setDistModel(DistModel newDistModel) {
 }
 
 template <typename SampleType>
-SampleType Distortion<SampleType>::processSaturation(SampleType inputSample,int channel)
+SampleType Distortion<SampleType>::processSaturation(SampleType inputSample)
 {
     switch (_model)
     {
@@ -115,18 +121,19 @@ SampleType Distortion<SampleType>::processSaturation(SampleType inputSample,int 
         return processHardClipper(inputSample) * juce::Decibels::decibelsToGain(_output.getNextValue());// implement gain stage
         break;
     case DistModel::kSoft:
-        return processSoftClipper(inputSample, true, channel) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return processSoftClipper(inputSample, true) * juce::Decibels::decibelsToGain(_output.getNextValue());
         break;
     case DistModel::kSat:
-        return processSaturationClip(inputSample, channel) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return processSaturationClip(inputSample) * juce::Decibels::decibelsToGain(_output.getNextValue());
         break;
     case DistModel::kHard2:
-        return processHardClip2(inputSample, true, channel) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return processHardClip2(inputSample, true) * juce::Decibels::decibelsToGain(_output.getNextValue());
         break;
     default:
         return inputSample;
     }
 }
+
 
 template <typename SampleType>
 void Distortion<SampleType>::process(juce::dsp::ProcessContextReplacing<SampleType>& context) noexcept
@@ -149,10 +156,11 @@ void Distortion<SampleType>::process(juce::dsp::ProcessContextReplacing<SampleTy
     {
         for (size_t sample = 0; sample < numSamples; ++sample)
         {
-            auto* input = inputBlock.getChannelPointer(channel);
+            //copy mono to both channels.
+            auto* input = inputBlock.getChannelPointer(0);
             auto* output = outputBlock.getChannelPointer(channel);
 
-            output[sample] = processSaturation(input[sample], channel);
+            output[sample] = processSaturation(input[sample]);
         }
     }
 }

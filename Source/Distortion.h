@@ -40,6 +40,7 @@ public:
     void prepare(const juce::dsp::ProcessSpec& spec);
     void reset();
     void setDrive(SampleType newDrive);
+    void setGainKnobVal(SampleType newGain);
     void setMix(SampleType newMix);
     void setOutput(SampleType newOutput);
 
@@ -48,13 +49,12 @@ public:
 
 
     void setDistModel(DistModel newDistModel);
-    SampleType processSaturation(SampleType inputSample, int channel);
-    void process(juce::dsp::ProcessContextReplacing<SampleType>& context) noexcept;
-
+    SampleType processSaturation(SampleType inputSample);
+    void process(juce::dsp::ProcessContextReplacing<SampleType>& context) noexcept; 
 
 
     /** Hard clip data */
-    SampleType processHardClip2(SampleType dataToClip, bool useDrive, int channel)
+    SampleType processHardClip2(SampleType dataToClip, bool useDrive)
     {
         auto wetSignal = dataToClip;
 
@@ -83,7 +83,7 @@ public:
 
     SampleType processHardClipper(SampleType inputSample) {
 
-        auto wetSig = inputSample * juce::Decibels::decibelsToGain(_input.getNextValue());
+        auto wetSig = inputSample * juce::Decibels::decibelsToGain(_input.getNextValue()) * gainKnobVal.getNextValue();
 
         if (std::abs(wetSig) > 0.50) {
             wetSig *= 0.50 / std::abs(wetSig);
@@ -96,16 +96,16 @@ public:
     }
 
     /** Diode */
-    SampleType processDiode(SampleType dataToClip, int channel)
+    SampleType processDiode(SampleType dataToClip)
     {
         // Diode algorithim
         auto wetSignal = dataToClip;
         wetSignal *= _rawGain.getNextValue();
-        wetSignal = processSoftClipper(0.315 * (juce::dsp::FastMathApproximations::exp(0.1 * dataToClip / (_diodeTerm)) - 1.0), false, channel);
-        return (1.0 - _mix.getNextValue()) * dataToClip + processHardClip2(wetSignal, false, channel)* _mix.getNextValue();
+        wetSignal = processSoftClipper(0.315 * (juce::dsp::FastMathApproximations::exp(0.1 * dataToClip / (_diodeTerm)) - 1.0), false);
+        return (1.0 - _mix.getNextValue()) * dataToClip + processHardClip2(wetSignal, false)* _mix.getNextValue();
     }
 
-    SampleType processTube(SampleType dataToClip, int channel)
+    SampleType processTube(SampleType dataToClip)
     {
         // Tube algorithim
         auto wetSignal = dataToClip;
@@ -114,12 +114,12 @@ public:
 
         if (wetSignal >= 0.0)
         {
-            wetSignal = processHardClip2(wetSignal, true, channel);
+            wetSignal = processHardClip2(wetSignal, true);
         }
 
         else
         {
-            wetSignal = processSoftClipper(wetSignal, true, channel);
+            wetSignal = processSoftClipper(wetSignal, true);
         }
 
         //wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * 0.25); 
@@ -148,7 +148,7 @@ public:
     //}
 
 
-    SampleType processSoftClipper(SampleType dataToClip, bool useDrive, int channel)
+    SampleType processSoftClipper(SampleType dataToClip, bool useDrive)
     {
         // Soft algorithim
         auto wetSignal = dataToClip;
@@ -174,7 +174,7 @@ public:
     }
 
 
-    SampleType processSaturationClip(SampleType dataToClip, int channel)
+    SampleType processSaturationClip(SampleType dataToClip)
     {
         auto wetSignal = dataToClip;
 
@@ -195,7 +195,7 @@ public:
         //wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue());
 
         // Mix dry with wet
-        auto mix = (1.0 - _mix.getNextValue()) * dataToClip + processSoftClipper(wetSignal - bias, false, channel) * _mix.getNextValue();
+        auto mix = (1.0 - _mix.getNextValue()) * dataToClip + processSoftClipper(wetSignal - bias, false) * _mix.getNextValue();
 
         return mix;
     }
@@ -236,6 +236,8 @@ private:
     juce::SmoothedValue<float> _gainDB;
     juce::SmoothedValue<float> _thresh;
     juce::SmoothedValue<float> _ceiling;
+
+    juce::SmoothedValue<float> gainKnobVal;
 
     static constexpr float _piRaw = juce::MathConstants<float>::pi;
     static constexpr float _diodeTerm = 2.0 * 0.0253;

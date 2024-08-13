@@ -60,8 +60,9 @@ public:
 
     AudioBufferQueue<float>& getAudioBufferQueue() noexcept { return audioBufferQueue; }
     void setDist(float newDist);
+    void setGainKnob(float gain);
     void setMix(float newMix);
-    void setCeiling(float newDist);
+    void setCeiling(float newCeil);
     void setThresh(float newThresh);
 
     void setReverbParameters(const juce::dsp::Reverb::Parameters& params);
