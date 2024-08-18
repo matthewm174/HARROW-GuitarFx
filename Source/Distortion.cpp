@@ -18,9 +18,25 @@ Distortion<SampleType>::Distortion()
 template <typename SampleType>
 void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
     _sampleRate = spec.sampleRate;
+
+    m_fuzzFilter.prepare(spec);
+    m_fuzzFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowShelf);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 2000.0);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 9.0);
+
+    m_lofiFilter.prepare(spec);
+    m_lofiFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
+    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowPass);
+    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
+    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 20000.0);
+
+
+
     _dcFilter.prepare(spec);
     _dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);
-    _dcFilter.setCutoffFrequency(50.0);
+    
     reset();
 }
 
@@ -68,6 +84,11 @@ void Distortion<SampleType>::setMix(SampleType newMix) {
 }
 
 template <typename SampleType>
+void Distortion<SampleType>::setFilter(SampleType filterfreq) {
+    _dcFilter.setCutoffFrequency(filterfreq);
+}
+
+template <typename SampleType>
 void Distortion<SampleType>::setOutput(SampleType newOutput) {
     _output.setTargetValue(newOutput);
      
@@ -108,26 +129,58 @@ void Distortion<SampleType>::setDistModel(DistModel newDistModel) {
             _model = newDistModel;
             break;
         }
+        case DistModel::kFuzz:
+        {
+            _model = newDistModel;
+            break;
+        }
+        case DistModel::kDiode:
+        {
+            _model = newDistModel;
+            break;
+        }
+        case DistModel::kLofi:
+        {
+            _model = newDistModel;
+            break;
+        }
+        case DistModel::kTube:
+        {
+            _model = newDistModel;
+            break;
+        }
 
     }
 }
 
 template <typename SampleType>
-SampleType Distortion<SampleType>::processSaturation(SampleType inputSample)
+SampleType Distortion<SampleType>::processSaturation(SampleType inputSample, int ch)
 {
     switch (_model)
     {
     case DistModel::kHard:
-        return processHardClipper(inputSample) * juce::Decibels::decibelsToGain(_output.getNextValue());// implement gain stage
+        return processHardClipper(inputSample, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());// implement gain stage
         break;
     case DistModel::kSoft:
-        return processSoftClipper(inputSample, true) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return processSoftClipper(inputSample, true, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
         break;
     case DistModel::kSat:
-        return processSaturationClip(inputSample) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return processSaturationClip(inputSample, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
         break;
     case DistModel::kHard2:
-        return processHardClip2(inputSample, true) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return processHardClip2(inputSample, true, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        break;
+    case DistModel::kTube:
+        return processTube(inputSample, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        break;
+    case DistModel::kDiode:
+        return processDiode(inputSample, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        break;
+    case DistModel::kLofi:
+        return processLofi(inputSample,  ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
+        break;
+    case DistModel::kFuzz:
+        return processFuzz(inputSample, ch) * juce::Decibels::decibelsToGain(_output.getNextValue());
         break;
     default:
         return inputSample;
@@ -160,7 +213,7 @@ void Distortion<SampleType>::process(juce::dsp::ProcessContextReplacing<SampleTy
             auto* input = inputBlock.getChannelPointer(0);
             auto* output = outputBlock.getChannelPointer(channel);
 
-            output[sample] = processSaturation(input[sample]);
+            output[sample] = processSaturation(_dcFilter.processSample(channel, input[sample]), channel);
         }
     }
 }

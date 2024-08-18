@@ -15,6 +15,7 @@
 #include "Reverb.h"
 #include "TubePre.h"
 #include "Delay.h"
+#include "NoiseGateEffect.h"
 //==============================================================================
 
 class DistAdvAudioProcessor 
@@ -32,6 +33,7 @@ public:
 #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 #endif
+    void processTunerSamples(const float* inputSamples, int numSamples);
 
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
@@ -66,11 +68,14 @@ public:
     void setThresh(float newThresh);
 
     void setReverbParameters(const juce::dsp::Reverb::Parameters& params);
-    void bypassReverb();
-    void bypassCab();
-    void bypassDist();
-    void bypassTube();
-    void bypassDelay();
+    bool bypassReverb();
+    bool bypassCab();
+    bool bypassDist();
+    bool bypassTube();
+    bool bypassTuner();
+    bool bypassDelay();
+    bool bypassNgPre();
+    bool bypassNgPost();
     void setCab(juce::File f);
     juce::File root, saveFile;
     void updateParameters(int selection);
@@ -79,14 +84,42 @@ public:
     void setTubeMix(float tubedr);
     void setTubeInputGain(float tubedr);
     void setTubeOutputGain(float tubedr);
+    void setFilterInFreq(float freq);
     void setDelay(float delaytime);
     void setDelayFb(float delaytime);
     void setDelayWet(float delaytime);
 
 
+    void setNgPreThresh(float ngpret);
+    void setNgPreRatio(float ngprerat);
+    void setNgPreAtk(float ngprea);
+    void setNgPreRel(float ngprer);
+
+
+    void setNgPostThresh(float ngpostt);
+    void setNgPostRatio(float ngpostrat);
+    void setNgPostAtk(float ngposta);
+    void setNgPostRel(float ngpostr);
+    float tunerfrequency = 0;
+    bool tunerOn = false;
+
+
+
+
 private:
-    // Static chain of effects, might makek this dynamic eventually with graphs
-    juce::dsp::ProcessorChain<Distortion<float>, TubePre<float>, CabSimulator<float>, ReverbEffect<float>, DelayEffect<float> > processorChain;
+    // Static chain of effects, might make this dynamic eventually with graphs
+    juce::dsp::ProcessorChain<NoiseGateEffect<float>, Distortion<float>, TubePre<float>, NoiseGateEffect<float>, CabSimulator<float>, ReverbEffect<float>, DelayEffect<float> > processorChain;
+    float  tunersampleRate;
+    int    tunerrecordSize = 2000;
+    float  tunerrecordedSamples[2000] = { };
+    int    tunercount = 0;
+    float  tunersum;
+    float  tunersumOld;
+    int    tunerpdState = 0;
+    int    tunerthresh = 0;
+
+
+
 
     AudioBufferQueue<float> audioBufferQueue;
 

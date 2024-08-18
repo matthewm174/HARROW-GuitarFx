@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "StateVariableFilter.h"
 
 template <typename SampleType>
 class Distortion {
@@ -42,6 +43,7 @@ public:
     void setDrive(SampleType newDrive);
     void setGainKnobVal(SampleType newGain);
     void setMix(SampleType newMix);
+    void setFilter(SampleType filterfreq);
     void setOutput(SampleType newOutput);
 
     void setThresh(SampleType newThresh);
@@ -49,14 +51,14 @@ public:
 
 
     void setDistModel(DistModel newDistModel);
-    SampleType processSaturation(SampleType inputSample);
+    SampleType processSaturation(SampleType inputSample, int channel);
     void process(juce::dsp::ProcessContextReplacing<SampleType>& context) noexcept; 
 
 
     /** Hard clip data */
-    SampleType processHardClip2(SampleType dataToClip, bool useDrive)
+    SampleType processHardClip2(SampleType dataToClip, bool useDrive, int channel)
     {
-        auto wetSignal = dataToClip;
+        auto wetSignal = dataToClip * gainKnobVal.getNextValue();;
 
         if (useDrive)
         {
@@ -81,9 +83,9 @@ public:
     }
 
 
-    SampleType processHardClipper(SampleType inputSample) {
-
-        auto wetSig = inputSample * juce::Decibels::decibelsToGain(_input.getNextValue()) * gainKnobVal.getNextValue();
+    SampleType processHardClipper(SampleType inputSample, int channel) {
+        
+        auto wetSig =inputSample * juce::Decibels::decibelsToGain(_input.getNextValue()) * gainKnobVal.getNextValue();
 
         if (std::abs(wetSig) > 0.50) {
             wetSig *= 0.50 / std::abs(wetSig);
@@ -96,16 +98,16 @@ public:
     }
 
     /** Diode */
-    SampleType processDiode(SampleType dataToClip)
+    SampleType processDiode(SampleType dataToClip, int channel)
     {
         // Diode algorithim
         auto wetSignal = dataToClip;
         wetSignal *= _rawGain.getNextValue();
-        wetSignal = processSoftClipper(0.315 * (juce::dsp::FastMathApproximations::exp(0.1 * dataToClip / (_diodeTerm)) - 1.0), false);
-        return (1.0 - _mix.getNextValue()) * dataToClip + processHardClip2(wetSignal, false)* _mix.getNextValue();
+        wetSignal = processSoftClipper(0.315 * (juce::dsp::FastMathApproximations::exp(0.1 * dataToClip / (_diodeTerm)) - 1.0), false, channel);
+        return (1.0 - _mix.getNextValue()) * dataToClip + processHardClip2(wetSignal, false, channel)* _mix.getNextValue();
     }
 
-    SampleType processTube(SampleType dataToClip)
+    SampleType processTube(SampleType dataToClip, int channel)
     {
         // Tube algorithim
         auto wetSignal = dataToClip;
@@ -114,12 +116,12 @@ public:
 
         if (wetSignal >= 0.0)
         {
-            wetSignal = processHardClip2(wetSignal, true);
+            wetSignal = processHardClip2(wetSignal, true, channel);
         }
 
         else
         {
-            wetSignal = processSoftClipper(wetSignal, true);
+            wetSignal = processSoftClipper(wetSignal, true, channel);
         }
 
         //wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * 0.25); 
@@ -130,28 +132,28 @@ public:
         return mix;
     }
     //wip
-    //SampleType processFuzz(SampleType dataToClip, int channel)
-    //{
-    //    // Fuzz algorithim
-    //    auto wetSignal = dataToClip;
+    SampleType processFuzz(SampleType dataToClip, int channel)
+    {
+        // Fuzz algorithim
+        auto wetSignal = dataToClip;
 
-    //    auto fuzz = processTube(wetSignal, channel);
+        auto fuzz = processTube(wetSignal, channel);
 
-    //    wetSignal = softClipData(m_fuzzFilter.processSample(fuzz, channel), true, channel);
+        wetSignal = processSoftClipper(m_fuzzFilter.processSample(fuzz, channel), true, channel);
 
-    //    wetSignal *= 0.5;
+        wetSignal *= 0.5;
 
-    //    // Mix dry with wet
-    //    auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
+        // Mix dry with wet
+        auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
 
-    //    return mix;
-    //}
+        return mix;
+    }
 
 
-    SampleType processSoftClipper(SampleType dataToClip, bool useDrive)
+    SampleType processSoftClipper(SampleType dataToClip, bool useDrive, int channel)
     {
         // Soft algorithim
-        auto wetSignal = dataToClip;
+        auto wetSignal = dataToClip * gainKnobVal.getNextValue();
 
         if (useDrive)
         {
@@ -174,7 +176,7 @@ public:
     }
 
 
-    SampleType processSaturationClip(SampleType dataToClip)
+    SampleType processSaturationClip(SampleType dataToClip, int channel)
     {
         auto wetSignal = dataToClip;
 
@@ -195,37 +197,38 @@ public:
         //wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue());
 
         // Mix dry with wet
-        auto mix = (1.0 - _mix.getNextValue()) * dataToClip + processSoftClipper(wetSignal - bias, false) * _mix.getNextValue();
+        auto mix = (1.0 - _mix.getNextValue()) * dataToClip + processSoftClipper(wetSignal - bias, false, channel) * _mix.getNextValue();
 
         return mix;
     }
 
     /** wip */
-    //SampleType processLofi(SampleType dataToClip, int channel)
-    //{
-    //    // Bias
-    //    auto wetSignal = dataToClip;
+    SampleType processLofi(SampleType dataToClip, int channel)
+    {
+        // Bias
+        auto wetSignal = dataToClip;
 
-    //    // Lofi algorithim
-    //    if (wetSignal < 0)
-    //    {
-    //        wetSignal *= juce::jmap(_gainDB.getNextValue(), 0.0f, 20.0f, 1.0f, -1.0f);
-    //    }
+        // Lofi algorithim
+        if (wetSignal < 0)
+        {
+            wetSignal *= juce::jmap(_gainDB.getNextValue(), 0.0f, 20.0f, 1.0f, -1.0f);
+        }
 
-    //    // Saturate signal
-    //    wetSignal = processSoftClipper(wetSignal, false, channel);
+        // Saturate signal
+        wetSignal = processSoftClipper(wetSignal, false, channel);
 
-    //    // Volume compensation
-    //    wetSignal *= juce::Decibels::decibelsToGain(_gainDB.getNextValue() * 0.25);
+        // Volume compensation
+        wetSignal *= juce::Decibels::decibelsToGain(_gainDB.getNextValue() * 0.25);
 
-    //    // Over 0 protection
-    //    wetSignal = processHardClip2(m_lofiFilter.processSample(wetSignal, channel), false, channel);
+        // Over 0 protection
+        wetSignal = processHardClip2(m_lofiFilter.processSample(wetSignal, channel), false,  channel);
 
-    //    // Mix dry with wet
-    //    auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
+        // Mix dry with wet
+        auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
 
-    //    return mix;
-    //}
+        return mix;
+    }
+
 
 
 private:
@@ -236,6 +239,7 @@ private:
     juce::SmoothedValue<float> _gainDB;
     juce::SmoothedValue<float> _thresh;
     juce::SmoothedValue<float> _ceiling;
+    juce::SmoothedValue<float> _lowcut;
 
     juce::SmoothedValue<float> gainKnobVal;
 
@@ -249,6 +253,8 @@ private:
     DistModel _model = DistModel::kHard;
 
     juce::dsp::LinkwitzRileyFilter<float> _dcFilter;
+    StateVariableFilter<float> m_fuzzFilter;
+    StateVariableFilter<float> m_lofiFilter;
 
 
 };

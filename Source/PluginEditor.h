@@ -32,12 +32,25 @@ private:
 
     juce::Slider reverbRoomSizeSlider;
     juce::Slider reverbDampingSlider;
+    juce::Slider reverbWidthSlider;
+        juce::Slider  reverbWetLevel;
+        juce::Slider  reverbDryLevel;
     juce::Slider driveSlider;
+    juce::Slider ngPreThreshSlider;
+    juce::Slider ngPreRatioSlider;
+    juce::Slider ngPreAtkSlider;
+    juce::Slider ngPreRelSlider;
+
+    juce::Slider ngPostThreshSlider;
+    juce::Slider ngPostRatioSlider;
+    juce::Slider ngPostAtkSlider;
+    juce::Slider ngPostRelSlider;
+
+    juce::Slider lowpassInSlider;
 
     juce::Slider threshSlider;
     juce::Slider mixSlider;
     juce::Slider ceilingSlider;
-
 
     juce::Slider tubeMix;
     juce::Slider tubeBias;
@@ -47,11 +60,26 @@ private:
 
     juce::Slider gainKnob;
 
-
-
     juce::Slider delayTime;
     juce::Slider delayFeedback;
     juce::Slider delayWet;
+
+    juce::Label lblNgPreRatio;
+    juce::Label lblNgPostRatio;
+
+    juce::Label lblNgPreThreshold;
+    juce::Label lblNgPostThreshold;
+
+    juce::Label lblNgPreAtk;
+    juce::Label lblNgPostAtk;
+
+    juce::Label lblNgPreRel;
+    juce::Label lblNgPostRel;
+
+    //oother
+    juce::Label lblMainGain;
+    juce::Label lblInputLp;
+
 
     //Dist
     juce::Label lblDistSel;
@@ -63,6 +91,10 @@ private:
     //verb
     juce::Label lblRoomSize;
     juce::Label lblDampening;
+    juce::Label lblRvbWet;
+    juce::Label lblRvbDry;
+    juce::Label lblRvbWidth;
+
 
     //tube ctrls
     juce::Label lbltubeMix;
@@ -75,6 +107,11 @@ private:
     juce::Label lbldelayTime;
     juce::Label lbldelayFeedback;
     juce::Label lbldelayWet;
+    juce::Label lblTunerNote;
+    juce::Label lblTunerOffsetCents;
+
+    juce::String noteName;
+    juce::String offsetTune;
 
     ScopeComponent<float> scopeComponent;
 
@@ -83,6 +120,9 @@ private:
     juce::TextButton bypassDistBtn;
     juce::TextButton bypassTube;
     juce::TextButton bypassDelay;
+    juce::TextButton bypassNgPre;
+    juce::TextButton bypassNgPost;
+    juce::TextButton tunerBtn;
 
     juce::TextButton loadIrBtn;
 

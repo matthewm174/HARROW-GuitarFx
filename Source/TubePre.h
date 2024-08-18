@@ -42,7 +42,7 @@ public:
             for (size_t sample = 0; sample < numSamples; ++sample)
             {
 
-                auto* input = inputBlock.getChannelPointer(0);
+                auto* input = inputBlock.getChannelPointer(channel);
                 auto* output = outputBlock.getChannelPointer(channel);
                 //auto* output = outputBlock.getChannelPointer(channel);
                 //output[sample] = processSamples(input[sample], channel);
@@ -98,7 +98,7 @@ private:
     juce::SmoothedValue<float> rawSaturation = 0.1;
 
     // --- IO
-    double inputGain = 1.5;
+    double inputGain = 1.0;
     double outputGain = 1.0;
     double dcOffsetDetected = 0.0;
 
