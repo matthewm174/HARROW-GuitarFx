@@ -15,6 +15,8 @@ https://docs.juce.com/master/index.html
 <br />
 https://wiki.analog.com/_media/resources/tools-software/sharc-audio-module/baremetal/audio_processing.zip
 <br />
+https://ccrma.stanford.edu/~dtyeh/papers/DavidYehThesissinglesided.pdf
+<br/>
 Big thanks to The Audio Programmer's line of Youtube videos as well!
 <br /><br />
 Quick Video of the plugin in action:
