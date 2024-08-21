@@ -20,10 +20,4 @@ https://ccrma.stanford.edu/~dtyeh/papers/DavidYehThesissinglesided.pdf
 <br/>
 Big thanks to The Audio Programmer's line of Youtube videos as well!
 <br /><br />
-Quick Video of the plugin in action:
-<br/>
-
-
-
-https://github.com/user-attachments/assets/b45c7edb-e267-4e23-adf2-c901498bf22a
 
