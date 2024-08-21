@@ -9,6 +9,7 @@ TODOS:<br />
 -touch up graphics by learning look and feel<br />
 -switch from processorchain to audiograph for flexibility<br />
 -figure out optimized ranges for sliders (you can get some weird effects with some of the current ranges, feature or bug, you decide)<br />
+-add cmake setup/look into pamplejuce
 <br />
 Helpful Links<br/>
 <br />
