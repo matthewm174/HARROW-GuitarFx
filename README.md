@@ -17,6 +17,8 @@ https://docs.juce.com/master/index.html
 https://wiki.analog.com/_media/resources/tools-software/sharc-audio-module/baremetal/audio_processing.zip
 <br />
 https://ccrma.stanford.edu/~dtyeh/papers/DavidYehThesissinglesided.pdf
+<br />
+https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 <br/>
 Big thanks to The Audio Programmer's line of Youtube videos as well!
 <br /><br />
