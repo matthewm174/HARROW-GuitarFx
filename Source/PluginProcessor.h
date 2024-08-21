@@ -16,6 +16,7 @@
 #include "TubePre.h"
 #include "Delay.h"
 #include "NoiseGateEffect.h"
+#include "BiquadEq.h"
 //==============================================================================
 
 class DistAdvAudioProcessor 
@@ -60,7 +61,23 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+    void setHiFreq(float _freq);
+
+    void setHiQ(float _q);
+
+    void setHiGain(float _freq);
+
+
+
+
     AudioBufferQueue<float>& getAudioBufferQueue() noexcept { return audioBufferQueue; }
+
+    void setMidFreq(float _freq);
+
+    void setMidQ(float _q);
+
+    void setMidGain(float _freq);
+
     void setDist(float newDist);
     void setGainKnob(float gain);
     void setMix(float newMix);
@@ -80,10 +97,10 @@ public:
     juce::File root, saveFile;
     void updateParameters(int selection);
     void setTubeDrive(float tubedr);
-    void setTubeBias(float tubedr);
-    void setTubeMix(float tubedr);
-    void setTubeInputGain(float tubedr);
-    void setTubeOutputGain(float tubedr);
+    void setTubeBias(float tubebias);
+    void setTubeMix(float tubemix);
+    void setTubeInputGain(float tubeig);
+    void setTubeOutputGain(float tubeog);
     void setFilterInFreq(float freq);
     void setDelay(float delaytime);
     void setDelayFb(float delaytime);
@@ -106,17 +123,24 @@ public:
 
 
 
+
 private:
+
+
+
     // Static chain of effects, might make this dynamic eventually with graphs
-    juce::dsp::ProcessorChain<NoiseGateEffect<float>, Distortion<float>, TubePre<float>, NoiseGateEffect<float>, CabSimulator<float>, ReverbEffect<float>, DelayEffect<float> > processorChain;
-    float  tunersampleRate;
-    int    tunerrecordSize = 2000;
-    float  tunerrecordedSamples[2000] = { };
-    int    tunercount = 0;
-    float  tunersum;
-    float  tunersumOld;
-    int    tunerpdState = 0;
-    int    tunerthresh = 0;
+    juce::dsp::ProcessorChain<NoiseGateEffect<float>, Distortion<float>, TubePre<float>, 
+        NoiseGateEffect<float>, CabSimulator<float>, BiquadEQ<float>, 
+        BiquadEQ<float>, ReverbEffect<float>, DelayEffect<float>> processorChain;
+
+    float  tunerSampleRate;
+    int    tunerRecordSize = 2000;
+    float  tunerRecordedSamples[2000] = { };
+    int    tunerCount = 0;
+    float  tunerSum;
+    float  tunerSumOld;
+    int    tunerPdState = 0;
+    int    tunerThresh = 0;
 
 
 

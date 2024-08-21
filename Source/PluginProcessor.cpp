@@ -116,6 +116,8 @@ void DistAdvAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock
     spec.numChannels = getTotalNumOutputChannels();
     oscillator.prepare(spec);
     oscillator.setFrequency(440.0f);
+    processorChain.get<5>().setType(EqType::PEQ);
+    processorChain.get<6>().setType(EqType::PEQ);
 
     processorChain.prepare(spec);
 
@@ -158,51 +160,51 @@ void DistAdvAudioProcessor::processTunerSamples(const float* inputSamples, int n
 
     for (int l = 0; l < numSamples; ++l) {
 
-        if (tunercount < tunerrecordSize) {
+        if (tunerCount < tunerRecordSize) {
 
             // Record samples (only use left / first channel)
-            tunerrecordedSamples[tunercount] = inputSamples[l];
-            tunercount++;
+            tunerRecordedSamples[tunerCount] = inputSamples[l];
+            tunerCount++;
 
         }
         else {
 
             // After samples are recorded
-            tunersum = 0;
-            tunerpdState = 0;
+            tunerSum = 0;
+            tunerPdState = 0;
             int period = 0;
 
-            for (int i = 0; i < tunerrecordSize; i++) {
+            for (int i = 0; i < tunerRecordSize; i++) {
 
                 // Autocorrelation
-                tunersumOld = tunersum;
-                tunersum = 0;
+                tunerSumOld = tunerSum;
+                tunerSum = 0;
 
-                for (int k = 0; k < tunerrecordSize - i; k++) {
-                    tunersum += tunerrecordedSamples[k] * tunerrecordedSamples[k + i];
+                for (int k = 0; k < tunerRecordSize - i; k++) {
+                    tunerSum += tunerRecordedSamples[k] * tunerRecordedSamples[k + i];
                 }
 
                 // Peak Detect State Machine
-                if (tunerpdState == 2 && (tunersum - tunersumOld) <= 0) {
+                if (tunerPdState == 2 && (tunerSum - tunerSumOld) <= 0) {
                     period = i;
-                    tunerpdState = 3;
+                    tunerPdState = 3;
                 }
 
-                if (tunerpdState == 1 && (tunersum > tunerthresh) && (tunersum - tunersumOld) > 0) {
-                    tunerpdState = 2;
+                if (tunerPdState == 1 && (tunerSum > tunerThresh) && (tunerSum - tunerSumOld) > 0) {
+                    tunerPdState = 2;
                 }
 
                 if (i == 0) {
-                    tunerthresh = tunersum * 0.5;
-                    tunerpdState = 1;
+                    tunerThresh = tunerSum * 0.5;
+                    tunerPdState = 1;
                 }
             }
 
             // Frequency identified in Hz
-            if (tunerthresh > 10) {
+            if (tunerThresh > 10) {
                 tunerfrequency = getSampleRate() / period;
             }
-            tunercount = 0;
+            tunerCount = 0;
         }
     }
 }
@@ -215,17 +217,19 @@ void DistAdvAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
 
-    auto* channelData = buffer.getReadPointer(0); // Assuming we're using the first (left) channel
-    int numSamples = buffer.getNumSamples();
+
 
     //testing sine, uncomment when needed
     //oscillator.process(juce::dsp::ProcessContextReplacing<float>(block));
 
     if (tunerOn) {
+        auto* channelData = buffer.getReadPointer(0); // Assuming we're using the first (left) channel
+        int numSamples = buffer.getNumSamples();
         processTunerSamples(channelData, numSamples);
         buffer.clear();
     }
     else {
+        
         processorChain.process(context);
         scopeDataCollector.process(buffer.getReadPointer(0), (size_t)buffer.getNumSamples());
     }
@@ -259,6 +263,39 @@ void DistAdvAudioProcessor::setStateInformation(const void* data, int sizeInByte
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
+//EQ
+
+void DistAdvAudioProcessor::setHiFreq(float _freq)
+{
+    processorChain.get<6>().setFreq(_freq);
+}
+void DistAdvAudioProcessor::setHiQ(float _q)
+{
+    processorChain.get<6>().setQ(_q);
+}
+void DistAdvAudioProcessor::setHiGain(float _freq)
+{
+    processorChain.get<6>().setGain(_freq);
+}
+
+
+
+void DistAdvAudioProcessor::setMidFreq(float _freq)
+{
+    processorChain.get<5>().setFreq(_freq);
+}
+
+void DistAdvAudioProcessor::setMidQ(float _q)
+{
+    processorChain.get<5>().setQ(_q);
+}
+
+void DistAdvAudioProcessor::setMidGain(float _freq)
+{
+    processorChain.get<5>().setGain(_freq);
+}
+
 
 //dist settings
 void DistAdvAudioProcessor::setDist(float gain)
@@ -297,20 +334,20 @@ void DistAdvAudioProcessor::setTubeDrive(float tubedr) {
     processorChain.get<2>().setDrive(tubedr);
 }
 
-void DistAdvAudioProcessor::setTubeBias(float tubedr) {
-    processorChain.get<2>().setBias(tubedr);
+void DistAdvAudioProcessor::setTubeBias(float tubebias) {
+    processorChain.get<2>().setBias(tubebias);
 }
 
-void DistAdvAudioProcessor::setTubeMix(float tubedr) {
-    processorChain.get<2>().setMix(tubedr);
+void DistAdvAudioProcessor::setTubeMix(float tubemix) {
+    processorChain.get<2>().setMix(tubemix);
 }
 
-void DistAdvAudioProcessor::setTubeInputGain(float tubedr) {
-    processorChain.get<2>().setInputGain(tubedr);
+void DistAdvAudioProcessor::setTubeInputGain(float tubeig) {
+    processorChain.get<2>().setInputGain(tubeig);
 }
 
-void DistAdvAudioProcessor::setTubeOutputGain(float tubedr) {
-    processorChain.get<2>().setOutputGain(tubedr);
+void DistAdvAudioProcessor::setTubeOutputGain(float tubeog) {
+    processorChain.get<2>().setOutputGain(tubeog);
 }
 //end tube
 
@@ -325,24 +362,24 @@ void DistAdvAudioProcessor::setCab(juce::File f)
 
 void DistAdvAudioProcessor::setReverbParameters(const juce::dsp::Reverb::Parameters& params)
 {
-    processorChain.get<5>().setParameters(params);
+    processorChain.get<7>().setParameters(params);
 }
 
 //delay
 
 void DistAdvAudioProcessor::setDelay(float delaytime)
 {
-    processorChain.get<6>().setDelayTime(delaytime);
+    processorChain.get<8>().setDelayTime(delaytime);
 }
 
 void DistAdvAudioProcessor::setDelayFb(float fb)
 {
-    processorChain.get<6>().setFeedback(fb);
+    processorChain.get<8>().setFeedback(fb);
 }
 
 void DistAdvAudioProcessor::setDelayWet(float wm)
 {
-    processorChain.get<6>().setWetMix(wm);
+    processorChain.get<8>().setWetMix(wm);
 }
 
 //noise gate pre
@@ -396,15 +433,15 @@ void DistAdvAudioProcessor::setNgPostRel(float ngpostr)
 //bypassing
 bool DistAdvAudioProcessor::bypassDelay()
 {
-    auto x = processorChain.isBypassed<6>();
-    processorChain.setBypassed<6>(!x);
+    auto x = processorChain.isBypassed<8>();
+    processorChain.setBypassed<8>(!x);
     return !x;
 }
 
 bool DistAdvAudioProcessor::bypassReverb()
 {
-    auto x = processorChain.isBypassed<5>();
-    processorChain.setBypassed<5>(!x);
+    auto x = processorChain.isBypassed<7>();
+    processorChain.setBypassed<7>(!x);
     return !x;
 }
 

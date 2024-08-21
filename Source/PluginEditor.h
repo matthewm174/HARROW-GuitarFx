@@ -30,11 +30,21 @@ private:
 
     std::unique_ptr<juce::FileChooser> filechooser;
 
+    juce::Slider midEqGainKnob;
+    juce::Slider midEqQKnob;
+    juce::Slider midEqFreqKnob;
+
+    juce::Slider hiEqGainKnob;
+    juce::Slider hiEqQKnob;
+    juce::Slider hiEqFreqKnob;
+
+
+
     juce::Slider reverbRoomSizeSlider;
     juce::Slider reverbDampingSlider;
     juce::Slider reverbWidthSlider;
-        juce::Slider  reverbWetLevel;
-        juce::Slider  reverbDryLevel;
+    juce::Slider  reverbWetLevel;
+    juce::Slider  reverbDryLevel;
     juce::Slider driveSlider;
     juce::Slider ngPreThreshSlider;
     juce::Slider ngPreRatioSlider;

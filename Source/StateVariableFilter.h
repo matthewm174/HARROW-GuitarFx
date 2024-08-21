@@ -15,7 +15,6 @@ class StateVariableFilter
 {
 public:
 
-    /** Creates an uninitialised filter. Call prepare() before first use. */
     StateVariableFilter();
     void prepare(const juce::dsp::ProcessSpec& spec);
 
@@ -122,7 +121,6 @@ public:
         const double LS = x + mGain * LP;
         const double HS = x + mGain * HP;
 
-        // unit delay (state variable)
         mZ1[ch] = mGCoeff * HP + BP;
         mZ2[ch] = mGCoeff * BP + LP;
 

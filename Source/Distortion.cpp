@@ -24,18 +24,19 @@ void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
     m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowShelf);
     m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
     m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 2000.0);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 9.0);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 10.0);
 
     m_lofiFilter.prepare(spec);
     m_lofiFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
     m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowPass);
     m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
-    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 20000.0);
+    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 10000.0);
 
 
 
     _dcFilter.prepare(spec);
     _dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);
+    _dcFilter.setCutoffFrequency(20.0f);
     
     reset();
 }
@@ -205,15 +206,18 @@ void Distortion<SampleType>::process(juce::dsp::ProcessContextReplacing<SampleTy
         return;
     }
 
+
+
+
     for (size_t channel = 0; channel < numChannels; ++channel)
     {
         for (size_t sample = 0; sample < numSamples; ++sample)
         {
-            //copy mono to both channels.
-            auto* input = inputBlock.getChannelPointer(0);
-            auto* output = outputBlock.getChannelPointer(channel);
 
+            auto* input = inputBlock.getChannelPointer(channel);
+            auto* output = outputBlock.getChannelPointer(channel);
             output[sample] = processSaturation(_dcFilter.processSample(channel, input[sample]), channel);
+
         }
     }
 }
