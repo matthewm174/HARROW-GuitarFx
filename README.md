@@ -2,7 +2,6 @@ Starting this project to learn some things about audio processing via Juce (and 
 <br /><br />
 TODOS:<br />
 -~~fix stereo issue~~- this issue is caused by not adding "{2, 2}, {1, 2}" as the plugin channel config in projucer, as well as i wasnt routing mono to both channels, this is a guitar amp afterall.<br /> 
--implement Lagrange 3rd order interpolation for the delayline to reduce audio artifacts when changing time<br />
 -~implement eq~<br />
 -implement dk method circuits<br/>
 -~implement noisegates~<br />
