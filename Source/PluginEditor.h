@@ -10,13 +10,14 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "PresetPanel.h"
 
 class DistAdvAudioProcessorEditor : public juce::AudioProcessorEditor,
     private juce::Slider::Listener, private juce::Button::Listener,
     public juce::ComboBox::Listener
 {
 public:
-    DistAdvAudioProcessorEditor(DistAdvAudioProcessor&);
+    DistAdvAudioProcessorEditor(DistAdvAudioProcessor&, juce::AudioProcessorValueTreeState& vts);
     ~DistAdvAudioProcessorEditor() override;
 
     void paint(juce::Graphics&) override;
@@ -24,6 +25,48 @@ public:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
 private:
+
+    juce::AudioProcessorValueTreeState& valueTreeState;
+
+    Gui::PresetPanel presetPanel;
+
+    //std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeMixAtt      ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeBiasAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeInAtt       ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeOutAtt      ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeDriveAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayTimeAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayFeedbackAtt;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayWetAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> midEqFreqAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> midEqQAtt       ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> midEqGainAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> hiEqFreqAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> hiEqQAtt        ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> hiEqGainAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbRoomAtt   ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDampAtt   ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAtt  ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWetAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDryAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAtt        ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveThreshAtt  ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveCeilAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveMixAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPreThreshAtt  ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPreRatioAtt   ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPreAtkAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPreRelAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPostThreshAtt ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPostRatioAtt  ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPostAtkAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPostRelAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tightenLpAtt    ;
+
+
     void sliderValueChanged(juce::Slider* slider) override;
     void buttonClicked(juce::Button* btn) override;
     DistAdvAudioProcessor& audioProcessor;
@@ -33,43 +76,33 @@ private:
     juce::Slider midEqGainKnob;
     juce::Slider midEqQKnob;
     juce::Slider midEqFreqKnob;
-
     juce::Slider hiEqGainKnob;
     juce::Slider hiEqQKnob;
     juce::Slider hiEqFreqKnob;
-
-
-
     juce::Slider reverbRoomSizeSlider;
     juce::Slider reverbDampingSlider;
     juce::Slider reverbWidthSlider;
-    juce::Slider  reverbWetLevel;
-    juce::Slider  reverbDryLevel;
+    juce::Slider reverbWetLevel;
+    juce::Slider reverbDryLevel;
     juce::Slider driveSlider;
     juce::Slider ngPreThreshSlider;
     juce::Slider ngPreRatioSlider;
     juce::Slider ngPreAtkSlider;
     juce::Slider ngPreRelSlider;
-
     juce::Slider ngPostThreshSlider;
     juce::Slider ngPostRatioSlider;
     juce::Slider ngPostAtkSlider;
     juce::Slider ngPostRelSlider;
-
     juce::Slider lowpassInSlider;
-
     juce::Slider threshSlider;
     juce::Slider mixSlider;
     juce::Slider ceilingSlider;
-
     juce::Slider tubeMix;
     juce::Slider tubeBias;
     juce::Slider tubeIG;
     juce::Slider tubeOG;
     juce::Slider tubeDrive;
-
     juce::Slider gainKnob;
-
     juce::Slider delayTime;
     juce::Slider delayFeedback;
     juce::Slider delayWet;

@@ -12,111 +12,163 @@
 #include "Oscilloscope.h"
 #include <string>
 #include "Parameters.h"
+#include "PresetPanel.h"
 
 //==============================================================================
 DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
-(DistAdvAudioProcessor& p)
-    : juce::AudioProcessorEditor(&p), audioProcessor(p), scopeComponent(audioProcessor.getAudioBufferQueue())
+(DistAdvAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
+    : juce::AudioProcessorEditor(&p), audioProcessor(p), 
+    scopeComponent(audioProcessor.getAudioBufferQueue()), 
+    presetPanel(p.getPresetManager()),
+    valueTreeState(vts)
 {
-    setSize(700, 700);
+    setSize(700, 720);
     addAndMakeVisible(scopeComponent);
 
 
-
-
-    /*
-        juce::Slider ngPreThreshSlider;
-    juce::Slider ngPreRatioSlider;
-    juce::Slider ngPreAtkSlider;
-    juce::Slider ngPreRelSlider;
-
-    juce::Slider ngPostThreshSlider;
-    juce::Slider ngPostRatioSlider;
-    juce::Slider ngPostAtkSlider;
-    juce::Slider ngPostRelSlider;
-*/
-
-
-    //ng1 - pre
+    //Slider styles
     ngPreThreshSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPreThreshSlider.setRange(-30.0f, 30.0f, 1.0f);
-    ngPreThreshSlider.setValue(-30.0f);
-    ngPreThreshSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPreThreshSlider.addListener(this);
-    addAndMakeVisible(ngPreThreshSlider);
-
     ngPreRatioSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPreRatioSlider.setRange(1.0f, 10.0f, 1.0f);
-    ngPreRatioSlider.setValue(1.0f);
-    ngPreRatioSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPreRatioSlider.addListener(this);
-    addAndMakeVisible(ngPreRatioSlider);
-
-    ngPreAtkSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPreAtkSlider.setRange(5.0f, 1000.0f, 5.0f);
-    ngPreAtkSlider.setValue(50.0f);
-    ngPreAtkSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPreAtkSlider.addListener(this);
-    addAndMakeVisible(ngPreAtkSlider);
-
     ngPreRelSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPreRelSlider.setRange(5.0f, 1000.0f, 5.0f);
-    ngPreRelSlider.setValue(50.0f);
-    ngPreRelSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPreRelSlider.addListener(this);
-    addAndMakeVisible(ngPreRelSlider);
-
-    //
-
-    //ng2 - post
-    ngPostThreshSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPostThreshSlider.setRange(-30.0f, 30.0f, 1.0f);
-    ngPostThreshSlider.setValue(-30.0f);
-    ngPostThreshSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPostThreshSlider.addListener(this);
-    addAndMakeVisible(ngPostThreshSlider);
-
-    ngPostRatioSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPostRatioSlider.setRange(0.0f, 10.0f, 1.0f);
-    ngPostRatioSlider.setValue(1.0f);
-    ngPostRatioSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPostRatioSlider.addListener(this);
-    addAndMakeVisible(ngPostRatioSlider);
-
-    ngPostAtkSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPostAtkSlider.setRange(5.0f, 2000.0f, 5.0f);
-    ngPostAtkSlider.setValue(5.0f);
-    ngPostAtkSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPostAtkSlider.addListener(this);
-    addAndMakeVisible(ngPostAtkSlider);
-
-    ngPostRelSlider.setSliderStyle(juce::Slider::Rotary);
-    ngPostRelSlider.setRange(5.0f, 2000.0f, 5.0f);
-    ngPostRelSlider.setValue(50.0f);
-    ngPostRelSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    ngPostRelSlider.addListener(this);
-    addAndMakeVisible(ngPostRelSlider);
-
-
-    //end gates
-    lowpassInSlider.setSliderStyle(juce::Slider::Rotary);
-    lowpassInSlider.setRange(20.0f, 666.0f);
-    lowpassInSlider.setValue(20.0f);
-    lowpassInSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    lowpassInSlider.addListener(this);
-    addAndMakeVisible(lowpassInSlider);
-
-
+    ngPreAtkSlider.setSliderStyle(juce::Slider::Rotary);
     gainKnob.setSliderStyle(juce::Slider::Rotary);
+    ngPostThreshSlider.setSliderStyle(juce::Slider::Rotary);
+    ngPostRatioSlider.setSliderStyle(juce::Slider::Rotary);
+    ngPostAtkSlider.setSliderStyle(juce::Slider::Rotary);
+    ngPostRelSlider.setSliderStyle(juce::Slider::Rotary);
+    lowpassInSlider.setSliderStyle(juce::Slider::Rotary);
+
+    //ranges
+    ngPreRatioSlider.setRange(1.0f, 10.0f, 1.0f);
+    ngPreThreshSlider.setRange(-30.0f, 30.0f, 1.0f);
+    ngPreAtkSlider.setRange(5.0f, 1000.0f, 5.0f);
+    ngPreRelSlider.setRange(5.0f, 1000.0f, 5.0f);
+    ngPostThreshSlider.setRange(-30.0f, 30.0f, 1.0f);
+    ngPostRatioSlider.setRange(0.0f, 10.0f, 1.0f);
+    ngPostAtkSlider.setRange(5.0f, 2000.0f, 5.0f);
+    ngPostRelSlider.setRange(5.0f, 2000.0f, 5.0f);
+    lowpassInSlider.setRange(20.0f, 666.0f);
     gainKnob.setRange(1.0f, 11.0f);
+    driveSlider.setRange(0.0f, 80.0f);
+    ceilingSlider.setRange(0.0f, 1.0f);
+    mixSlider.setRange(0.0f, 1.0f);
+    threshSlider.setRange(0.0f, 1.0f);
+    reverbWidthSlider.setRange(0.0f, 1.0f);
+    reverbDryLevel.setRange(0.0f, 1.0f);
+    reverbWetLevel.setRange(0.0f, 1.0f);
+    reverbDampingSlider.setRange(0.0f, 1.0f);
+    tubeMix.setRange(0.0f, 1.0f, .1f);
+    reverbRoomSizeSlider.setRange(0.0f, 1.0f);
+    tubeOG.setRange(0.0f, 5.0f);
+    tubeIG.setRange(0.0f, 2.0f, .1f);
+    tubeBias.setRange(0.0f, 3.0f);
+    tubeDrive.setRange(0.0f, 5.0f);
+    delayTime.setRange(0.0f, 3000.0f);
+    delayFeedback.setRange(0.0f, 100.0f);
+    hiEqFreqKnob.setRange(3000.0f, 5000.0f, 10.0f);
+    delayWet.setRange(0.0f, 100.0f);
+    hiEqQKnob.setRange(0.01f, 1.5f, 0.01f);
+    hiEqGainKnob.setRange(-12.0f, 12.0f, 1.0f);
+    midEqFreqKnob.setRange(500.0f, 3000.0, 10.0f);
+    midEqQKnob.setRange(0.01f, 1.5f, 0.01f);
+    midEqGainKnob.setRange(-12.0f, 12.0f, 0.5f);
+
+    //base values
+    ngPreThreshSlider.setValue(-30.0f);
+    ngPreRatioSlider.setValue(1.0f);
+    ngPreAtkSlider.setValue(50.0f);
+    ngPreRelSlider.setValue(50.0f);
+    ngPostThreshSlider.setValue(-30.0f);
+    ngPostRatioSlider.setValue(1.0f);
+    ngPostAtkSlider.setValue(5.0f);
+    ngPostRelSlider.setValue(50.0f);
+    lowpassInSlider.setValue(20.0f);
     gainKnob.setValue(2.0f);
-    gainKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    gainKnob.addListener(this);
+    driveSlider.setValue(1.0f);
+    ceilingSlider.setValue(1.f);
+    mixSlider.setValue(1.f);
+    threshSlider.setValue(1.0f);
+    reverbWidthSlider.setValue(0.0f);
+    reverbDryLevel.setValue(1.0f);
+    reverbWetLevel.setValue(0.5f);
+    reverbDampingSlider.setValue(0.0f);
+    reverbRoomSizeSlider.setValue(0.0f);
+    tubeMix.setValue(0.0f);
+    tubeIG.setValue(0.0f);
+    tubeOG.setValue(5.0f);
+    tubeBias.setValue(0.5f);
+    tubeDrive.setValue(1.0f);
+    delayTime.setValue(1.0f);
+    delayFeedback.setValue(1.0f);
+    delayWet.setValue(1.0f);
+    hiEqFreqKnob.setValue(4500.0f);
+    hiEqQKnob.setValue(0.1f);
+    hiEqGainKnob.setValue(1.0f);
+    midEqFreqKnob.setValue(600.0f);
+    midEqQKnob.setValue(0.1f);
+    midEqGainKnob.setValue(1.0f);
+
+    //add and make visible
+    //sliders
+    addAndMakeVisible(ngPreRatioSlider);
+    addAndMakeVisible(ngPreThreshSlider);
+    addAndMakeVisible(ngPreAtkSlider);
+    addAndMakeVisible(ngPreRelSlider);
+    addAndMakeVisible(ngPostThreshSlider);
+    addAndMakeVisible(ngPostRatioSlider);
+    addAndMakeVisible(ngPostAtkSlider);
+    addAndMakeVisible(ngPostRelSlider);
+    addAndMakeVisible(lowpassInSlider);
     addAndMakeVisible(gainKnob);
+    addAndMakeVisible(distSelect);
+    addAndMakeVisible(driveSlider);
+    addAndMakeVisible(ceilingSlider);
+    addAndMakeVisible(mixSlider);
+    addAndMakeVisible(threshSlider);
+    addAndMakeVisible(reverbWidthSlider);
+    addAndMakeVisible(reverbDryLevel);
+    addAndMakeVisible(reverbWetLevel);
+    addAndMakeVisible(reverbDampingSlider);
+    addAndMakeVisible(reverbRoomSizeSlider);
+    addAndMakeVisible(tubeMix);
+    addAndMakeVisible(tubeIG);
+    addAndMakeVisible(tubeOG);
+    addAndMakeVisible(tubeBias);
+    addAndMakeVisible(tubeDrive);
+    addAndMakeVisible(delayTime);
+    addAndMakeVisible(delayFeedback);
+    addAndMakeVisible(delayWet);
+    addAndMakeVisible(hiEqFreqKnob);
+    addAndMakeVisible(hiEqQKnob);
+    addAndMakeVisible(hiEqGainKnob);
+    addAndMakeVisible(midEqFreqKnob);
+    addAndMakeVisible(midEqQKnob);
+    addAndMakeVisible(midEqGainKnob);
 
+    //btns
+    addAndMakeVisible(bypassCabSim);
+    addAndMakeVisible(bypassVerbBtn);
+    addAndMakeVisible(bypassDistBtn);
+    addAndMakeVisible(bypassNgPre);
+    addAndMakeVisible(bypassNgPost);
+    addAndMakeVisible(bypassTube);
+    addAndMakeVisible(loadIrBtn);
+    addAndMakeVisible(tunerBtn);
+    addAndMakeVisible(bypassDelay);
 
+    //textbox styles
+    ngPreAtkSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPreRelSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPostThreshSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPostRatioSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPostAtkSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPostRelSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    lowpassInSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    gainKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPreThreshSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ngPreRatioSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
-
+    //dist select
     distSelect.addItem("EGGIE", 1); //hc1
     distSelect.addItem("SWEETPEA", 4); //hc2
     distSelect.addItem("DANDY", 2);
@@ -125,309 +177,181 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     distSelect.addItem("SPENCER2", 6);
     distSelect.addItem("SPENCER3", 7);
     distSelect.setSelectedId(1);
+
+    //lsiteners
+    gainKnob.addListener(this);
     distSelect.addListener(this);
-    addAndMakeVisible(distSelect);
-
-    driveSlider.setRange(0.0f, 80.0f);
-    driveSlider.setValue(1.0f);
+    ngPostRelSlider.addListener(this);
+    ngPreAtkSlider.addListener(this);
+    ngPostAtkSlider.addListener(this);
     driveSlider.addListener(this);
-    addAndMakeVisible(driveSlider);
-
-    ceilingSlider.setRange(0.0f, 1.0f);
-    ceilingSlider.setValue(1.f);
     ceilingSlider.addListener(this);
-    addAndMakeVisible(ceilingSlider);
-
-    mixSlider.setRange(0.0f, 1.0f);
-    mixSlider.setValue(1.f);
     mixSlider.addListener(this);
-    addAndMakeVisible(mixSlider);
-
-    threshSlider.setRange(0.0f, 1.0f);
-    threshSlider.setValue(1.0f);
     threshSlider.addListener(this);
-    addAndMakeVisible(threshSlider);
-
-    reverbWidthSlider.setRange(0.0f, 1.0f);
-    reverbWidthSlider.setValue(0.0f);
     reverbWidthSlider.addListener(this);
-    addAndMakeVisible(reverbWidthSlider);
-
-    reverbDryLevel.setRange(0.0f, 1.0f);
-    reverbDryLevel.setValue(1.0f);
     reverbDryLevel.addListener(this);
-    addAndMakeVisible(reverbDryLevel);
-
-    reverbWetLevel.setRange(0.0f, 1.0f);
-    reverbWetLevel.setValue(0.5f);
     reverbWetLevel.addListener(this);
-    addAndMakeVisible(reverbWetLevel);
-
-
-    reverbDampingSlider.setRange(0.0f, 1.0f);
-    reverbDampingSlider.setValue(0.0f);
     reverbDampingSlider.addListener(this);
-    addAndMakeVisible(reverbDampingSlider);
-
-    reverbRoomSizeSlider.setRange(0.0f, 1.0f);
-    reverbRoomSizeSlider.setValue(0.0f);
     reverbRoomSizeSlider.addListener(this);
-    addAndMakeVisible(reverbRoomSizeSlider);
-
-
-    tubeMix.setRange(0.0f, 1.0f,.1f);
-    tubeMix.setValue(0.0f);
     tubeMix.addListener(this);
-    addAndMakeVisible(tubeMix);
-
-    tubeIG.setRange(0.0f, 2.0f, .1f);
-    tubeIG.setValue(0.0f);
     tubeIG.addListener(this);
-    addAndMakeVisible(tubeIG);
-
-    tubeOG.setRange(0.0f, 5.0f);
-    tubeOG.setValue(5.0f);
     tubeOG.addListener(this);
-    addAndMakeVisible(tubeOG);
-
-    tubeBias.setRange(0.0f, 3.0f);
-    tubeBias.setValue(0.5f);
     tubeBias.addListener(this);
-    addAndMakeVisible(tubeBias);
-
-    tubeDrive.setRange(0.0f, 5.0f);
-    tubeDrive.setValue(1.0f);
     tubeDrive.addListener(this);
-    addAndMakeVisible(tubeDrive);
-
-    delayTime.setRange(0.0f, 3000.0f);
-    delayTime.setValue(1.0f);
     delayTime.addListener(this);
-    addAndMakeVisible(delayTime);
-
-
-    delayFeedback.setRange(0.0f, 100.0f);
-    delayFeedback.setValue(1.0f);
     delayFeedback.addListener(this);
-    addAndMakeVisible(delayFeedback);
-
-    delayWet.setRange(0.0f, 100.0f);
-    delayWet.setValue(1.0f);
     delayWet.addListener(this);
-    addAndMakeVisible(delayWet);
-    //EQ
-
-
-    hiEqFreqKnob.setRange(3000.0f, 5000.0f, 10.0f);
-    hiEqFreqKnob.setValue(4500.0f);
     hiEqFreqKnob.addListener(this);
-    addAndMakeVisible(hiEqFreqKnob);
-    
-    hiEqQKnob.setRange(0.01f, 1.5f, 0.01f);
-    hiEqQKnob.setValue(0.1f);
     hiEqQKnob.addListener(this);
-    addAndMakeVisible(hiEqQKnob);
-    
-    hiEqGainKnob.setRange(-12.0f, 12.0f, 1.0f);
-    hiEqGainKnob.setValue(1.0f);
     hiEqGainKnob.addListener(this);
-    addAndMakeVisible(hiEqGainKnob);
-
-    midEqFreqKnob.setRange(500.0f, 3000.0, 10.0f);
-    midEqFreqKnob.setValue(600.0f);
     midEqFreqKnob.addListener(this);
-    addAndMakeVisible(midEqFreqKnob);
-
-    midEqQKnob.setRange(0.01f, 1.5f, 0.01f);
-    midEqQKnob.setValue(0.1f);
     midEqQKnob.addListener(this);
-    addAndMakeVisible(midEqQKnob);
-
-    midEqGainKnob.setRange(-12.0f, 12.0f, 0.5f);
-    midEqGainKnob.setValue(1.0f);
     midEqGainKnob.addListener(this);
-    addAndMakeVisible(midEqGainKnob);
+    bypassCabSim.addListener(this);
+    bypassVerbBtn.addListener(this);
+    bypassDistBtn.addListener(this);
+    bypassNgPre.addListener(this);
+    bypassNgPost.addListener(this);
+    bypassTube.addListener(this);
+    loadIrBtn.addListener(this);
+    tunerBtn.addListener(this);
+    bypassDelay.addListener(this);
+    ngPostRatioSlider.addListener(this);
+    lowpassInSlider.addListener(this);
+    ngPreRelSlider.addListener(this);
+    ngPostThreshSlider.addListener(this);
+    ngPreRatioSlider.addListener(this);
+    ngPreThreshSlider.addListener(this);
 
     //BYPASSING
-    audioProcessor.bypassReverb();
-    audioProcessor.bypassCab();
-    audioProcessor.bypassReverb();
-    audioProcessor.bypassDist();
-    audioProcessor.bypassDelay();
-    audioProcessor.bypassTube();
-    audioProcessor.bypassNgPre();
-    audioProcessor.bypassNgPost();
+    //audioProcessor.bypassReverb();
+    //audioProcessor.bypassCab();
+    //audioProcessor.bypassReverb();
+    //audioProcessor.bypassDist();
+    //audioProcessor.bypassDelay();
+    //audioProcessor.bypassTube();
+    //audioProcessor.bypassNgPre();
+    //audioProcessor.bypassNgPost();
 
-    //OTHER BTNS
+    //button text
     bypassCabSim.setButtonText("CAB");
-    bypassCabSim.addListener(this);
-    addAndMakeVisible(bypassCabSim);
+    bypassVerbBtn.setButtonText("VERB");
+    bypassDistBtn.setButtonText("DIST");
+    bypassNgPre.setButtonText("NOISE GATE PRE DIST");
+    bypassNgPost.setButtonText("NOISE GATE POST DIST");
+    bypassTube.setButtonText("TUBE");
+    loadIrBtn.setButtonText("LOAD IR");
+    tunerBtn.setButtonText("TUNER");
+    bypassDelay.setButtonText("DELAY");
+
+    //Colors
+    bypassDelay.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
+    bypassTube.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
+    bypassNgPost.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
+    bypassNgPre.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
+    bypassDistBtn.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
+    bypassVerbBtn.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
     bypassCabSim.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
 
-    addAndMakeVisible(bypassVerbBtn);
-    bypassVerbBtn.setButtonText("VERB");
-    bypassVerbBtn.addListener(this);
-    bypassVerbBtn.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
-
-
-    addAndMakeVisible(bypassDistBtn);
-    bypassDistBtn.setButtonText("DIST");
-    bypassDistBtn.addListener(this);
-    bypassDistBtn.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
-
-
-    addAndMakeVisible(bypassNgPre);
-    bypassNgPre.setButtonText("NOISE GATE PRE DIST");
-    bypassNgPre.addListener(this);
-    bypassNgPre.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
-
-
-    addAndMakeVisible(bypassNgPost);
-    bypassNgPost.setButtonText("NOISE GATE POST DIST");
-    bypassNgPost.addListener(this);
-    bypassNgPost.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
-
-
-    addAndMakeVisible(bypassTube);
-    bypassTube.setButtonText("TUBE");
-    bypassTube.addListener(this);
-    bypassTube.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
-
-
-    addAndMakeVisible(loadIrBtn);
-    loadIrBtn.setButtonText("LOAD IR");
-    loadIrBtn.addListener(this);
-
-
-    tunerBtn.setButtonText("TUNER");
-    tunerBtn.addListener(this);
-    addAndMakeVisible(tunerBtn);
-
-
-    addAndMakeVisible(bypassDelay);
-    bypassDelay.setButtonText("DELAY");
-    bypassDelay.addListener(this);
-    bypassDelay.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::mediumvioletred);
-
     //lbl
+    lblNgPreThreshold   .setText("Thresh pre", juce::dontSendNotification);
+    lblNgPreRatio       .setText("Ratio", juce::dontSendNotification);
+    lblNgPreAtk         .setText("Attack", juce::dontSendNotification);
+    lblNgPreRel         .setText("Release", juce::dontSendNotification);
+    lblNgPostThreshold  .setText("Thresh post", juce::dontSendNotification);
+    lblNgPostRatio      .setText("Ratio", juce::dontSendNotification);
+    lblNgPostAtk        .setText("Attack", juce::dontSendNotification);
+    lblNgPostRel        .setText("Release", juce::dontSendNotification);
+    lblMainGain         .setText("Boost", juce::dontSendNotification);
+    lblInputLp          .setText("Tighten LP", juce::dontSendNotification);
+    lblDistSel          .setText("Dist Type", juce::dontSendNotification);
+    lblDistDrive        .setText("Distortion Level", juce::dontSendNotification);
+    lblDistCeiling      .setText("Squash", juce::dontSendNotification);
+    lblDistMix          .setText("Distortion Mix", juce::dontSendNotification);
+    lblDistThresh       .setText("Slam", juce::dontSendNotification);
+    lblRoomSize         .setText("Room Size", juce::dontSendNotification);
+    lblDampening        .setText("Dampening", juce::dontSendNotification);
+    lblRvbDry           .setText("Reverb Dry", juce::dontSendNotification);
+    lblRvbWet           .setText("Reverb Wet", juce::dontSendNotification);
+    lblRvbWidth         .setText("Reverb Width", juce::dontSendNotification);
+    lbltubeMix          .setText("Tube Mix",juce::dontSendNotification);
+    lbltubeIG           .setText("Tube Input Gain",juce::dontSendNotification);
+    lbltubeOG           .setText("Tube Output Gain",juce::dontSendNotification);
+    lbltubeBias         .setText("Tube Bias",juce::dontSendNotification);
+    lbltubeDrive        .setText("Tube Drive",juce::dontSendNotification);
+    lbldelayTime        .setText("Delay Time",juce::dontSendNotification);
+    lbldelayFeedback    .setText("Delay Feedback",juce::dontSendNotification);
+    lbldelayWet         .setText("Delay Mix",juce::dontSendNotification);
 
-    lblNgPreThreshold.setText("Thresh pre", juce::dontSendNotification);
-    lblNgPreRatio.setText("Ratio", juce::dontSendNotification);
-    lblNgPreAtk.setText("Attack", juce::dontSendNotification);
-    lblNgPreRel.setText("Release", juce::dontSendNotification);
-    lblNgPostThreshold.setText("Thresh post", juce::dontSendNotification);
-    lblNgPostRatio.setText("Ratio", juce::dontSendNotification);
-    lblNgPostAtk.setText("Attack", juce::dontSendNotification);
-    lblNgPostRel.setText("Release", juce::dontSendNotification);
 
-
-    lblMainGain.setText("Boost", juce::dontSendNotification);
-    lblInputLp.setText("Tighten LP", juce::dontSendNotification);
-
-
-
-    lblDistSel         .setText("Dist Type", juce::dontSendNotification);
-    lblDistDrive       .setText("Distortion Level", juce::dontSendNotification);
-    lblDistCeiling     .setText("Squash", juce::dontSendNotification);
-    lblDistMix         .setText("Distortion Mix", juce::dontSendNotification);
-    lblDistThresh      .setText("Slam", juce::dontSendNotification);
-
-    lblRoomSize        .setText("Room Size", juce::dontSendNotification);
-    lblDampening       .setText("Dampening", juce::dontSendNotification);
-    lblRvbDry       .setText("Reverb Dry", juce::dontSendNotification);
-    lblRvbWet       .setText("Reverb Wet", juce::dontSendNotification);
-    lblRvbWidth       .setText("Reverb Width", juce::dontSendNotification);
-
-    lbltubeMix         .setText("Tube Mix",juce::dontSendNotification);
-    lbltubeIG          .setText("Tube Input Gain",juce::dontSendNotification);
-    lbltubeOG          .setText("Tube Output Gain",juce::dontSendNotification);
-    lbltubeBias        .setText("Tube Bias",juce::dontSendNotification);
-    lbltubeDrive       .setText("Tube Drive",juce::dontSendNotification);
-    lbldelayTime       .setText("Delay Time",juce::dontSendNotification);
-    lbldelayFeedback   .setText("Delay Feedback",juce::dontSendNotification);
-    lbldelayWet        .setText("Delay Mix",juce::dontSendNotification);
-
-    
+    //font
     juce::Font parameterLabel("Arial", 12.0f, juce::Font::bold);
 
-    lblMainGain.setFont(parameterLabel);
-    lblInputLp.setFont(parameterLabel);
-
-
-    lblNgPreThreshold  .setFont(parameterLabel);
+    lblMainGain         .setFont(parameterLabel);
+    lblInputLp          .setFont(parameterLabel);
+    lblNgPreThreshold   .setFont(parameterLabel);
     lblNgPostThreshold  .setFont(parameterLabel);
+    lblNgPreRatio       .setFont(parameterLabel);
+    lblNgPostRatio      .setFont(parameterLabel);
+    lblNgPreAtk         .setFont(parameterLabel);
+    lblNgPostAtk        .setFont(parameterLabel);
+    lblNgPreRel         .setFont(parameterLabel);
+    lblNgPostRel        .setFont(parameterLabel);
+    lblDistSel          .setFont(parameterLabel);
+    lblDistDrive        .setFont(parameterLabel);
+    lblDistCeiling      .setFont(parameterLabel);
+    lblDistMix          .setFont(parameterLabel);
+    lblDistThresh       .setFont(parameterLabel);
+    lblRoomSize         .setFont(parameterLabel);
+    lblDampening        .setFont(parameterLabel);
+    lbltubeMix          .setFont(parameterLabel);
+    lbltubeIG           .setFont(parameterLabel);
+    lbltubeOG           .setFont(parameterLabel);
+    lbltubeBias         .setFont(parameterLabel);
+    lbltubeDrive        .setFont(parameterLabel);
+    lbldelayTime        .setFont(parameterLabel);
+    lbldelayFeedback    .setFont(parameterLabel);
+    lbldelayWet         .setFont(parameterLabel);
 
-    lblNgPreRatio.setFont(parameterLabel);
-    lblNgPostRatio.setFont(parameterLabel);
+    //colors
 
-    lblNgPreAtk.setFont(parameterLabel);
-    lblNgPostAtk.setFont(parameterLabel);
-    lblNgPreRel.setFont(parameterLabel);
-    lblNgPostRel.setFont(parameterLabel);
-
-    lblDistSel         .setFont(parameterLabel);
-    lblDistDrive       .setFont(parameterLabel);
-    lblDistCeiling     .setFont(parameterLabel);
-    lblDistMix         .setFont(parameterLabel);
-    lblDistThresh      .setFont(parameterLabel);
-    lblRoomSize        .setFont(parameterLabel);
-    lblDampening       .setFont(parameterLabel);
-    lbltubeMix         .setFont(parameterLabel);
-    lbltubeIG          .setFont(parameterLabel);
-    lbltubeOG          .setFont(parameterLabel);
-    lbltubeBias        .setFont(parameterLabel);
-    lbltubeDrive       .setFont(parameterLabel);
-    lbldelayTime       .setFont(parameterLabel);
-    lbldelayFeedback   .setFont(parameterLabel);
-    lbldelayWet        .setFont(parameterLabel);
-
-    //tuner
-
-    lblMainGain.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblInputLp.setColour(juce::Label::textColourId, juce::Colours::white);
-
-    lblNgPreThreshold .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPostThreshold.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPreRatio.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPostRatio.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPreAtk.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPostAtk.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPreRel.setColour(juce::Label::textColourId, juce::Colours::white);
-    lblNgPostRel.setColour(juce::Label::textColourId, juce::Colours::white);
-
-
-    lblDistSel        .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblDistDrive      .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblDistCeiling    .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblDistMix        .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblDistThresh     .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblRoomSize       .setColour(juce::Label::textColourId, juce::Colours::white);
-    lblDampening      .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbltubeMix        .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbltubeIG         .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbltubeOG         .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbltubeBias       .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbltubeDrive      .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbldelayTime      .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbldelayFeedback  .setColour(juce::Label::textColourId, juce::Colours::white);
-    lbldelayWet       .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblMainGain         .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblInputLp          .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPreThreshold   .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPostThreshold  .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPreRatio       .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPostRatio      .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPreAtk         .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPostAtk        .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPreRel         .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblNgPostRel        .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblDistSel          .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblDistDrive        .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblDistCeiling      .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblDistMix          .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblDistThresh       .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblRoomSize         .setColour(juce::Label::textColourId, juce::Colours::white);
+    lblDampening        .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbltubeMix          .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbltubeIG           .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbltubeOG           .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbltubeBias         .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbltubeDrive        .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbldelayTime        .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbldelayFeedback    .setColour(juce::Label::textColourId, juce::Colours::white);
+    lbldelayWet         .setColour(juce::Label::textColourId, juce::Colours::white);
 
 
     addAndMakeVisible(lblTunerNote);
     addAndMakeVisible(lblTunerOffsetCents);
-
     addAndMakeVisible(lblNgPreThreshold);
     addAndMakeVisible(lblNgPostThreshold);
-
     addAndMakeVisible(lblNgPreRatio);
     addAndMakeVisible(lblNgPostRatio);
-
     addAndMakeVisible(lblNgPreRel);
     addAndMakeVisible(lblNgPostRel);
-
     addAndMakeVisible(lblNgPreAtk);
     addAndMakeVisible(lblNgPostAtk);
-
     addAndMakeVisible(lblDistSel);
     addAndMakeVisible(lblDistDrive);
     addAndMakeVisible(lblDistCeiling);
@@ -438,7 +362,6 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     addAndMakeVisible(lblRvbDry);
     addAndMakeVisible(lblRvbWet);
     addAndMakeVisible(lblRvbWidth);
-
     addAndMakeVisible(lbltubeMix);
     addAndMakeVisible(lbltubeIG);
     addAndMakeVisible(lbltubeOG);
@@ -447,10 +370,45 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     addAndMakeVisible(lbldelayTime);
     addAndMakeVisible(lbldelayFeedback);
     addAndMakeVisible(lbldelayWet);
-
-
     addAndMakeVisible(lblMainGain);
     addAndMakeVisible(lblInputLp);
+    addAndMakeVisible(presetPanel);
+   
+    //attachments
+    gainAtt              = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "gain",                     gainKnob              );
+    tubeMixAtt           = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tubeMix",                  tubeMix               );
+    tubeBiasAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tubeBias",                 tubeBias              );
+    tubeInAtt            = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tubeIn",                   tubeIG                );
+    tubeOutAtt           = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tubeOut",                  tubeOG                );
+    tubeDriveAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tubeDrive",                tubeDrive             );
+    delayTimeAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "delayTime",                delayTime             );
+    delayFeedbackAtt     = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "delayFeedback",            delayFeedback         );
+    delayWetAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "delayWet",                 delayWet              );
+    midEqFreqAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "midEqFreq",                midEqFreqKnob         );
+    midEqQAtt            = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "midEqQ",                   midEqQKnob            );
+    midEqGainAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "midEqGain",                midEqGainKnob         );
+    hiEqFreqAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "hiEqFreq",                 hiEqFreqKnob          );
+    hiEqQAtt             = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "hiEqQ",                    hiEqQKnob             );
+    hiEqGainAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "hiEqGain",                 hiEqGainKnob          );
+    reverbRoomAtt        = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbRoom",               reverbRoomSizeSlider  );
+    reverbDampAtt        = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbDamp",               reverbDampingSlider   );
+    reverbWidthAtt       = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbWidth",              reverbWidthSlider     );
+    reverbWetAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbWet",                reverbWetLevel        );
+    reverbDryAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbDry",                reverbDryLevel        );
+    driveAtt             = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "drive",                    driveSlider           );
+    driveThreshAtt       = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "driveThresh",              threshSlider          );
+    driveCeilAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "driveCeil",                ceilingSlider         );
+    driveMixAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "driveMix",                 mixSlider             );
+    ngPreThreshAtt       = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPreThresh",              ngPreThreshSlider     );
+    ngPreRatioAtt        = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPreRatio",               ngPreRatioSlider      );
+    ngPreAtkAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPreAtk",                 ngPreAtkSlider        );
+    ngPreRelAtt          = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPreRel",                 ngPreRelSlider        );
+    ngPostThreshAtt      = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPostThresh",             ngPostThreshSlider    );
+    ngPostRatioAtt       = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPostRatio",              ngPostRatioSlider     );
+    ngPostAtkAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPostAtk",                ngPostAtkSlider       );
+    ngPostRelAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPostRel",                ngPostRelSlider       );
+    tightenLpAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tightenLp",                lowpassInSlider       );
+
 
 }
 
@@ -515,16 +473,16 @@ void DistAdvAudioProcessorEditor::paint(juce::Graphics& g)
 
 }
 
+
 void DistAdvAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
-
+    //Bounds
+    presetPanel.setBounds(20, 670, 300, 40);
     distSelect.setBounds(20, 600, 100, 30);
     gainKnob.setBounds(240, 600, 80, 80);
     lowpassInSlider.setBounds(320, 600, 80, 80);
-
     scopeComponent.setBounds(0, 0, area.getWidth(), 100);
-
     driveSlider.setBounds(20,               120, 300, 20);                                     
     threshSlider.setBounds(20,              140, 300,   20);
     ceilingSlider.setBounds(20,             160, 300,  20);
@@ -570,12 +528,6 @@ void DistAdvAudioProcessorEditor::resized()
     lblNgPostAtk.setBounds(500,       370, 100, 20);
     lblNgPostRel.setBounds(580,       370, 100, 20);
 
-
-
-    //lblNgPreRatio.setBounds(580, 130, 100, 20);
-    //lblNgPostRatio.setBounds(580, 290, 100, 20);
-
-
     //buttons (mostly bypasses) - in order left to right
     bypassCabSim.setBounds(20, 70, 80, 50);
     bypassVerbBtn.setBounds(100, 70, 80, 50);
@@ -587,38 +539,29 @@ void DistAdvAudioProcessorEditor::resized()
     bypassNgPost.setBounds(580, 70, 80, 50);
     tunerBtn.setBounds(580, 460, 80, 50);
 
-
-
-
-
     //labels etc
-    lblDistSel        .setBounds(150, 590, 50, 30);
-    lblMainGain        .setBounds(260, 590, 100, 30);
-    lblInputLp        .setBounds(320, 590, 100, 30);
-
-                                        
-    lblDistDrive      .setBounds(350, 120, 90, 30);
-    lblDistCeiling    .setBounds(350, 140, 90, 30);
-    lblDistMix        .setBounds(350, 160, 90, 30);
-    lblDistThresh     .setBounds(350, 180, 90, 30);     
-    lbltubeMix        .setBounds(350, 200, 90, 30);
-    lbltubeIG         .setBounds(350, 220, 90, 30);
-    lbltubeOG         .setBounds(350, 240, 90, 30);
-    lbltubeBias       .setBounds(350, 260, 90, 30);
-    lbltubeDrive      .setBounds(350, 280, 90, 30);                 
-    lbldelayTime      .setBounds(350, 300, 90, 30);
-    lbldelayFeedback  .setBounds(350, 320, 90, 30);
-    lbldelayWet       .setBounds(350, 340, 90, 30);
-    lblRoomSize       .setBounds(350, 360, 90, 30);
-    lblDampening      .setBounds(350, 380, 90, 30);
-    lblRvbWidth       .setBounds(350, 400, 90, 30);
-    lblRvbWet         .setBounds(350, 420, 90, 30);
-    lblRvbDry         .setBounds(350, 440, 90, 30);
-
-
-
-    lblTunerNote.setBounds(600, 500, 50, 50);
-    lblTunerOffsetCents.setBounds(600, 525, 100, 50);
+    lblDistSel          .setBounds(150, 590, 50,    30);
+    lblMainGain         .setBounds(260, 590, 100,   30);
+    lblInputLp          .setBounds(320, 590, 100,   30);                    
+    lblDistDrive        .setBounds(350, 120, 90,    30);
+    lblDistCeiling      .setBounds(350, 140, 90,    30);
+    lblDistMix          .setBounds(350, 160, 90,    30);
+    lblDistThresh       .setBounds(350, 180, 90,    30);     
+    lbltubeMix          .setBounds(350, 200, 90,    30);
+    lbltubeIG           .setBounds(350, 220, 90,    30);
+    lbltubeOG           .setBounds(350, 240, 90,    30);
+    lbltubeBias         .setBounds(350, 260, 90,    30);
+    lbltubeDrive        .setBounds(350, 280, 90,    30);                 
+    lbldelayTime        .setBounds(350, 300, 90,    30);
+    lbldelayFeedback    .setBounds(350, 320, 90,    30);
+    lbldelayWet         .setBounds(350, 340, 90,    30);
+    lblRoomSize         .setBounds(350, 360, 90,    30);
+    lblDampening        .setBounds(350, 380, 90,    30);
+    lblRvbWidth         .setBounds(350, 400, 90,    30);
+    lblRvbWet           .setBounds(350, 420, 90,    30);
+    lblRvbDry           .setBounds(350, 440, 90,    30);
+    lblTunerNote        .setBounds(600, 500, 50,    50);
+    lblTunerOffsetCents .setBounds(600, 525, 100,   50);
 
 }
 void DistAdvAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)

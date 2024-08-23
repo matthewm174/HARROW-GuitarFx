@@ -17,6 +17,7 @@
 #include "Delay.h"
 #include "NoiseGateEffect.h"
 #include "BiquadEq.h"
+#include "PresetManager.h"
 //==============================================================================
 
 class DistAdvAudioProcessor 
@@ -26,6 +27,7 @@ public:
 
 
     DistAdvAudioProcessor();
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
     ~DistAdvAudioProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -121,24 +123,27 @@ public:
     bool tunerOn = false;
 
 
-
+    Service::PresetManager& getPresetManager() { return *presetManager; }
 
 
 private:
 
-
+    juce::AudioProcessorValueTreeState harrowParams;
 
     // Static chain of effects, might make this dynamic eventually with graphs
     juce::dsp::ProcessorChain<NoiseGateEffect<float>, Distortion<float>, TubePre<float>, 
         NoiseGateEffect<float>, CabSimulator<float>, BiquadEQ<float>, 
         BiquadEQ<float>, ReverbEffect<float>, DelayEffect<float>> processorChain;
 
-    float  tunerSampleRate;
+    std::unique_ptr<Service::PresetManager> presetManager;
+
+    //tuner settings
+    float  tunerSampleRate = 0;
     int    tunerRecordSize = 2000;
     float  tunerRecordedSamples[2000] = { };
     int    tunerCount = 0;
-    float  tunerSum;
-    float  tunerSumOld;
+    float  tunerSum = 0;
+    float  tunerSumOld = 0;
     int    tunerPdState = 0;
     int    tunerThresh = 0;
 

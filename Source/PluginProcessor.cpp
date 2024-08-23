@@ -9,9 +9,11 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Parameters.h"
+#include "ParameterState.h"
+#include "PresetManager.h"
 
 
-DistAdvAudioProcessor::DistAdvAudioProcessor() 
+DistAdvAudioProcessor::DistAdvAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     : AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
@@ -22,7 +24,12 @@ DistAdvAudioProcessor::DistAdvAudioProcessor()
 #endif
     )
 #endif
+    , harrowParams(*this, nullptr, ProjectInfo::projectName, Utility::ParameterHelper::createParameterLayout())
 {
+    harrowParams.state.setProperty(Service::PresetManager::presetNameProperty, "", nullptr);
+    harrowParams.state.setProperty("version", ProjectInfo::versionString, nullptr);
+
+    presetManager = std::make_unique<Service::PresetManager>(harrowParams);
     oscillator.initialise([](float x) { return std::sin(x); });
 }
 
@@ -246,7 +253,7 @@ bool DistAdvAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* DistAdvAudioProcessor::createEditor()
 {
-    return new DistAdvAudioProcessorEditor(*this);
+    return new DistAdvAudioProcessorEditor(*this, harrowParams);
 
 }
 
@@ -256,12 +263,21 @@ void DistAdvAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    const auto state = harrowParams.copyState();
+    const auto xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
 void DistAdvAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    const auto xmlState = getXmlFromBinary(data, sizeInBytes);
+    if (xmlState == nullptr)
+        return;
+    const auto newTree = juce::ValueTree::fromXml(*xmlState);
+    harrowParams.replaceState(newTree);
+
 }
 
 //EQ
