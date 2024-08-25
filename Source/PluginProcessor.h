@@ -72,6 +72,7 @@ public:
 
 
 
+
     AudioBufferQueue<float>& getAudioBufferQueue() noexcept { return audioBufferQueue; }
 
     void setMidFreq(float _freq);
@@ -87,14 +88,16 @@ public:
     void setThresh(float newThresh);
 
     void setReverbParameters(const juce::dsp::Reverb::Parameters& params);
-    bool bypassReverb();
-    bool bypassCab();
-    bool bypassDist();
-    bool bypassTube();
-    bool bypassTuner();
-    bool bypassDelay();
-    bool bypassNgPre();
-    bool bypassNgPost();
+    void bypassReverb(bool);
+    void bypassCab(bool);
+    void bypassDist(bool);
+    void bypassTube(bool);
+    bool bypassTuner(bool);
+    //void toggleState(juce::String param);
+    //bool getToggleState(juce::String param);
+    void bypassDelay(bool);
+    void bypassNgPre(bool);
+    void bypassNgPost(bool);
     void setCab(juce::File f);
     juce::File root, saveFile;
     void updateParameters(int selection);
@@ -124,11 +127,12 @@ public:
 
 
     Service::PresetManager& getPresetManager() { return *presetManager; }
+    juce::AudioProcessorValueTreeState harrowParams;
+
 
 
 private:
 
-    juce::AudioProcessorValueTreeState harrowParams;
 
     // Static chain of effects, might make this dynamic eventually with graphs
     juce::dsp::ProcessorChain<NoiseGateEffect<float>, Distortion<float>, TubePre<float>, 

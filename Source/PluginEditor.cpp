@@ -74,7 +74,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     midEqGainKnob.setRange(-12.0f, 12.0f, 0.5f);
 
     //base values
-    ngPreThreshSlider.setValue(-30.0f);
+    /*ngPreThreshSlider.setValue(-30.0f);
     ngPreRatioSlider.setValue(1.0f);
     ngPreAtkSlider.setValue(50.0f);
     ngPreRelSlider.setValue(50.0f);
@@ -106,7 +106,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     hiEqGainKnob.setValue(1.0f);
     midEqFreqKnob.setValue(600.0f);
     midEqQKnob.setValue(0.1f);
-    midEqGainKnob.setValue(1.0f);
+    midEqGainKnob.setValue(1.0f);*/
 
     //add and make visible
     //sliders
@@ -146,6 +146,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     addAndMakeVisible(midEqGainKnob);
 
     //btns
+
     addAndMakeVisible(bypassCabSim);
     addAndMakeVisible(bypassVerbBtn);
     addAndMakeVisible(bypassDistBtn);
@@ -408,6 +409,19 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     ngPostAtkAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPostAtk",                ngPostAtkSlider       );
     ngPostRelAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "ngPostRel",                ngPostRelSlider       );
     tightenLpAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "tightenLp",                lowpassInSlider       );
+    //btns
+    delayOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "delayOn",                bypassDelay       );
+    reverbOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "reverbOn",                bypassVerbBtn       );
+    cabOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "cabOn",                bypassCabSim       );
+    distOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "distOn",                bypassDistBtn       );
+    tubeOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "tubeOn",                bypassTube       );
+    ng1OnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "ng1On",                bypassNgPre       );
+    ng2OnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "ng2On",                bypassNgPost       );
+    tunerOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "tunerOn",                tunerBtn      );
+
+
+
+    distSelectAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(valueTreeState,             "distType",                distSelect      );
 
 
 }
@@ -423,8 +437,40 @@ DistAdvAudioProcessorEditor::~DistAdvAudioProcessorEditor()
     ngPostAtkSlider         .removeListener(this);
     ngPostRelSlider         .removeListener(this);
     reverbDampingSlider     .removeListener(this);
+    hiEqFreqKnob            .removeListener(this);
+    hiEqQKnob               .removeListener(this);
+    hiEqGainKnob            .removeListener(this);
+    midEqFreqKnob           .removeListener(this);
+    midEqQKnob              .removeListener(this);
+    midEqGainKnob           .removeListener(this);
+    reverbDryLevel          .removeListener(this);
+    reverbWetLevel          .removeListener(this);
+    lowpassInSlider         .removeListener(this);
+    ceilingSlider           .removeListener(this);
+    mixSlider               .removeListener(this);
+    threshSlider            .removeListener(this);
+    reverbWidthSlider       .removeListener(this);
+    gainKnob                .removeListener(this);
+    delayTime.removeListener(this);
+    delayFeedback.removeListener(this);
+    delayWet.removeListener(this);
+
+    tubeBias.removeListener(this);
+    tubeIG.removeListener(this);
+    tubeOG.removeListener(this);
+    tubeMix.removeListener(this);
+    tubeDrive.removeListener(this);
+
+
+
+    bypassDelay             .removeListener(this);
     bypassDistBtn           .removeListener(this);
+    bypassTube              .removeListener(this);
     bypassVerbBtn           .removeListener(this);
+    bypassCabSim            .removeListener(this);
+    bypassNgPost            .removeListener(this);
+    bypassNgPre             .removeListener(this);
+    tunerBtn                .removeListener(this);
     bypassCabSim            .removeListener(this);
     loadIrBtn               .removeListener(this);
     reverbRoomSizeSlider    .removeListener(this);
@@ -439,6 +485,14 @@ void DistAdvAudioProcessorEditor::paint(juce::Graphics& g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::white);
     g.setFont(juce::FontOptions(20.0f));
+
+    bypassVerbBtn.setColour(juce::ToggleButton::ColourIds::textColourId, bypassVerbBtn.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
+    bypassCabSim.setColour(juce::ToggleButton::ColourIds::textColourId, bypassCabSim.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
+    bypassDelay.setColour(juce::ToggleButton::ColourIds::textColourId, bypassDelay.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
+    bypassDistBtn.setColour(juce::ToggleButton::ColourIds::textColourId, bypassDistBtn.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
+    bypassTube.setColour(juce::ToggleButton::ColourIds::textColourId, bypassTube.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
+    bypassNgPre.setColour(juce::ToggleButton::ColourIds::textColourId, bypassNgPre.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
+    bypassNgPost.setColour(juce::ToggleButton::ColourIds::textColourId, bypassNgPost.getToggleState() ? juce::Colours::palegreen : juce::Colours::palevioletred);
 
 
     //tuner
@@ -675,82 +729,50 @@ void DistAdvAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 void DistAdvAudioProcessorEditor::buttonClicked(juce::Button* btn) {
     juce::Button& currBtnRef = *btn;
     if (btn == &bypassVerbBtn)
-    {
-        bool x = audioProcessor.bypassReverb();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
 
-        }
+    {
+        auto a = currBtnRef.getToggleState();
+        audioProcessor.bypassReverb(a);
     }
     
     if (btn == &tunerBtn)
     {
-        audioProcessor.bypassTuner();
+        auto a = currBtnRef.getToggleState();
+
+        audioProcessor.bypassTuner(a);
     }
 
     if (btn == &bypassCabSim)
     {
-        bool x = audioProcessor.bypassCab();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
+        auto a = currBtnRef.getToggleState();
 
-        }
+        audioProcessor.bypassCab(a);
     }
     if (btn == &bypassDistBtn)
     {
-        bool x = audioProcessor.bypassDist();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
+        auto a = currBtnRef.getToggleState();
 
-        }
+        audioProcessor.bypassDist(a);
     }
     if (btn == &bypassTube) {
-        bool x = audioProcessor.bypassTube();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
+        auto a = currBtnRef.getToggleState();
 
-        }
+        audioProcessor.bypassTube(a);
     }
     if (btn == &bypassDelay) {
-        bool x = audioProcessor.bypassDelay();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
-        }
+        auto a = currBtnRef.getToggleState();
+
+        audioProcessor.bypassDelay(a);
     }
     if (btn == &bypassNgPre) {
-        bool x = audioProcessor.bypassNgPre();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
+        auto a = currBtnRef.getToggleState();
 
-        }
+        audioProcessor.bypassNgPre(a);
     }
     if (btn == &bypassNgPost) {
-        bool x = audioProcessor.bypassNgPost();
-        if (x) {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palevioletred);
-        }
-        else {
-            currBtnRef.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::palegreen);
+        auto a = currBtnRef.getToggleState();
 
-        }
+        audioProcessor.bypassNgPost(a);
     }
     if (btn == &loadIrBtn) {
         filechooser = std::make_unique<juce::FileChooser>("Choose File", audioProcessor.root, "*");

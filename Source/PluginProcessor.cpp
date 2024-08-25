@@ -447,62 +447,71 @@ void DistAdvAudioProcessor::setNgPostRel(float ngpostr)
 }
 
 //bypassing
-bool DistAdvAudioProcessor::bypassDelay()
+
+
+
+
+void DistAdvAudioProcessor::bypassNgPre(bool a)
 {
-    auto x = processorChain.isBypassed<8>();
-    processorChain.setBypassed<8>(!x);
-    return !x;
+    processorChain.setBypassed<0>(a);
+}
+void DistAdvAudioProcessor::bypassDist(bool a)
+{
+    processorChain.setBypassed<1>(a);
+}
+void DistAdvAudioProcessor::bypassTube(bool a)
+{
+    processorChain.setBypassed<2>(a);
+}
+void DistAdvAudioProcessor::bypassNgPost(bool a)
+{
+    processorChain.setBypassed<3>(a);
 }
 
-bool DistAdvAudioProcessor::bypassReverb()
+void DistAdvAudioProcessor::bypassCab(bool a)
 {
-    auto x = processorChain.isBypassed<7>();
-    processorChain.setBypassed<7>(!x);
-    return !x;
+    processorChain.setBypassed<4>(a);
+}
+//5-6 for EQ.
+void DistAdvAudioProcessor::bypassDelay(bool a)
+{
+    processorChain.setBypassed<8>(a);
 }
 
-bool DistAdvAudioProcessor::bypassCab()
+void DistAdvAudioProcessor::bypassReverb(bool a)
 {
-    auto x = processorChain.isBypassed<4>();
-    processorChain.setBypassed<4>(!x);
-    return !x;
-}
-
-bool DistAdvAudioProcessor::bypassNgPre()
-{
-    auto x = processorChain.isBypassed<0>();
-    processorChain.setBypassed<0>(!x);
-    return !x;
-}
-
-bool DistAdvAudioProcessor::bypassNgPost()
-{
-    auto x = processorChain.isBypassed<3>();
-    processorChain.setBypassed<3>(!x);
-    return !x;
-}
-
-bool DistAdvAudioProcessor::bypassDist()
-{
-    auto x = processorChain.isBypassed<1>();
-    processorChain.setBypassed<1>(!x);
-    return !x;
-}
-bool DistAdvAudioProcessor::bypassTube()
-{
-    auto x = processorChain.isBypassed<2>();
-    processorChain.setBypassed<2>(!x);
-    return !x;
-}
-
-bool DistAdvAudioProcessor::bypassTuner()
-{
-    tunerOn = !tunerOn;
-    return tunerOn;
+    processorChain.setBypassed<7>(a);
 }
 
 
 
+bool DistAdvAudioProcessor::bypassTuner(bool a)
+{
+    tunerOn = a;
+    return a;
+}
+
+//void DistAdvAudioProcessor::toggleState(juce::String param)
+//{
+//    if (auto* paramp = harrowParams.getParameter(param))
+//    {
+//        bool currentValue = paramp->getValue() >= 0.5f;
+//        bool newValue = !currentValue;
+//
+//        //paramp->beginChangeGesture();
+//        paramp->setValueNotifyingHost(newValue ? 1.0f : 0.0f);
+//        //paramp->endChangeGesture();
+//    }
+//}
+//
+//bool DistAdvAudioProcessor::getToggleState(juce::String param)
+//{
+//    if (auto* reverbParam = harrowParams.getParameter(param))
+//    {
+//        return reverbParam->getValue() >= 0.5f;
+//    }
+//    return false;
+//}
 
 
 //==============================================================================

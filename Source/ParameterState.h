@@ -31,10 +31,10 @@ namespace Utility
 				std::make_unique<juce::AudioParameterFloat>("delayFeedback", "Delay Feedback",      juce::NormalisableRange<float>{0.f, 100.0f, 0.1f}, 1.f),//    ngPostRelSlider.setRange(5.0f, 2000.0f, 5.0f);
 				std::make_unique<juce::AudioParameterFloat>("delayWet", "Delay Level",              juce::NormalisableRange<float>{0.f, 100.0f, 0.1f}, 1.f),//    lowpassInSlider.setRange(20.0f, 666.0f);
 				std::make_unique<juce::AudioParameterFloat>("midEqFreq", "Low-Mid Freq",            juce::NormalisableRange<float>{500.f, 3000.0f, 0.1f}, 1.f),//    gainKnob.setRange(1.0f, 11.0f);
-				std::make_unique<juce::AudioParameterFloat>("midEqQ", "Low-Mid Q",                  juce::NormalisableRange<float>{0.f, 1.5f, 0.1f}, 1.f),//    driveSlider.setRange(0.0f, 80.0f);
-				std::make_unique<juce::AudioParameterFloat>("midEqGain", "Low-Mid Gain",            juce::NormalisableRange<float>{0.f, 12.f, 0.1f}, 1.f),//    ceilingSlider.setRange(0.0f, 1.0f);
+				std::make_unique<juce::AudioParameterFloat>("midEqQ", "Low-Mid Q",                  juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 1.f),//    driveSlider.setRange(0.0f, 80.0f);
+				std::make_unique<juce::AudioParameterFloat>("midEqGain", "Low-Mid Gain",            juce::NormalisableRange<float>{-12.f, 12.f, 0.1f}, 1.f),//    ceilingSlider.setRange(0.0f, 1.0f);
 				std::make_unique<juce::AudioParameterFloat>("hiEqFreq", "Hi-Mid Freq",              juce::NormalisableRange<float>{3000.f, 5000.f, 0.1f}, 1.f),//    mixSlider.setRange(0.0f, 1.0f);
-				std::make_unique<juce::AudioParameterFloat>("hiEqQ", "Hi-Mid Q",                    juce::NormalisableRange<float>{0.f, 1.5f, 0.1f}, 1.0f),//    threshSlider.setRange(0.0f, 1.0f);
+				std::make_unique<juce::AudioParameterFloat>("hiEqQ", "Hi-Mid Q",                    juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 1.0f),//    threshSlider.setRange(0.0f, 1.0f);
 				std::make_unique<juce::AudioParameterFloat>("hiEqGain", "Hi-Mid Gain",              juce::NormalisableRange<float>{0.f, 12.f, 0.1f}, 1.0f),//    reverbWidthSlider.setRange(0.0f, 1.0f);
 				std::make_unique<juce::AudioParameterFloat>("reverbRoom", "Reverb Room Size",       juce::NormalisableRange<float>{0.f, 1.0f, 0.1f}, 1.0f),//    reverbDryLevel.setRange(0.0f, 1.0f);
 				std::make_unique<juce::AudioParameterFloat>("reverbDamp", "Reverb Dampening",       juce::NormalisableRange<float>{0.f, 1.0f, 0.1f}, 1.0f),//    reverbWetLevel.setRange(0.0f, 1.0f);
@@ -46,14 +46,26 @@ namespace Utility
 				std::make_unique<juce::AudioParameterFloat>("driveCeil", "Distortion Slam DOWN",    juce::NormalisableRange<float>{0.f, 1.0f, 0.1f}, 1.0f),//    tubeBias.setRange(0.0f, 3.0f);
 				std::make_unique<juce::AudioParameterFloat>("driveMix", "Distortion Mix",           juce::NormalisableRange<float>{0.f, 1.0f, 0.1f}, 1.0f),//    tubeDrive.setRange(0.0f, 5.0f);
 				std::make_unique<juce::AudioParameterFloat>("ngPreThresh", "NG1 Thresh",            juce::NormalisableRange<float>{-60.f, 30.0f, 0.1f}, 1.0f),//    delayTime.setRange(0.0f, 3000.0f);
-				std::make_unique<juce::AudioParameterFloat>("ngPreRatio", "NG1 Ratio",              juce::NormalisableRange<float>{0.2f, 10.0f, 0.1f}, 1.0f),//    delayFeedback.setRange(0.0f, 100.0f);
+				std::make_unique<juce::AudioParameterFloat>("ngPreRatio", "NG1 Ratio",              juce::NormalisableRange<float>{1.0f, 10.0f, 0.1f}, 1.0f),//    delayFeedback.setRange(0.0f, 100.0f);
 				std::make_unique<juce::AudioParameterFloat>("ngPreAtk", "NG1 Attack",               juce::NormalisableRange<float>{0.5f, 10.0f, 0.1f}, 1.0f),//    hiEqFreqKnob.setRange(3000.0f, 5000.0f, 10.0f);
 				std::make_unique<juce::AudioParameterFloat>("ngPreRel", "NG1 Release",              juce::NormalisableRange<float>{1.0f, 1000.0f, 0.1f}, 1.0f),//    delayWet.setRange(0.0f, 100.0f);
 				std::make_unique<juce::AudioParameterFloat>("ngPostThresh", "NG2 Thresh",           juce::NormalisableRange<float>{-30.f, 30.0f, 0.1f}, 1.0f),//    hiEqQKnob.setRange(0.01f, 1.5f, 0.01f);
-				std::make_unique<juce::AudioParameterFloat>("ngPostRatio", "NG2 Ratio",             juce::NormalisableRange<float>{0.2f, 10.0f, 0.1f}, 1.0f),//    hiEqGainKnob.setRange(-12.0f, 12.0f, 1.0f);
+				std::make_unique<juce::AudioParameterFloat>("ngPostRatio", "NG2 Ratio",             juce::NormalisableRange<float>{1.0f, 10.0f, 0.1f}, 1.0f),//    hiEqGainKnob.setRange(-12.0f, 12.0f, 1.0f);
 				std::make_unique<juce::AudioParameterFloat>("ngPostAtk", "NG2 Attack",              juce::NormalisableRange<float>{0.5f, 11.0f, 0.1f}, 1.0f),//    midEqFreqKnob.setRange(500.0f, 3000.0, 10.0f);
 				std::make_unique<juce::AudioParameterFloat>("ngPostRel", "NG2 Release",             juce::NormalisableRange<float>{1.0f, 1000.0f, 0.1f}, 1.0f),//    midEqQKnob.setRange(0.01f, 1.5f, 0.01f);
-				std::make_unique<juce::AudioParameterFloat>("tightenLp", "Tighten Lowend",          juce::NormalisableRange<float>{0.0f, 11.0f, 0.1f}, 20.0f)	//    midEqGainKnob.setRange(-12.0f, 12.0f, 0.5f);
+				std::make_unique<juce::AudioParameterFloat>("tightenLp", "Tighten Lowend",          juce::NormalisableRange<float>{10.0f, 666.0f, 1.0f}, 20.0f),	//    midEqGainKnob.setRange(-12.0f, 12.0f, 0.5f);
+
+				std::make_unique<juce::AudioParameterBool>("distOn", "Distortion On", false),
+				std::make_unique<juce::AudioParameterBool>("cabOn", "Cabinet On", false),
+				std::make_unique<juce::AudioParameterBool>("reverbOn", "Verb On", false),
+				std::make_unique<juce::AudioParameterBool>("delayOn", "Delay On", false),
+				std::make_unique<juce::AudioParameterBool>("tubeOn", "Tube On", false),
+				std::make_unique<juce::AudioParameterBool>("tunerOn", "Tuner On", false),
+				std::make_unique<juce::AudioParameterBool>("ng1On", "NG1 On", false),
+				std::make_unique<juce::AudioParameterBool>("ng2On", "NG2 On", false),
+				std::make_unique<juce::AudioParameterChoice>("distType", "Distortion Type", juce::StringArray{"EGGIE", "DANDY", "SWEETPEA", "DAISY", "SPENCER1", "SPENCER2", "SPENCER3"}, 0),
+				//std::make_unique<juce::AudioParameterChoice>("reverbMode", "Reverb Mode",
+						//juce::StringArray{"Small Room", "Large Hall", "Plate"}
 			};
 		}
 	};

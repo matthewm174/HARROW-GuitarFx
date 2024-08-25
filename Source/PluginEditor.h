@@ -24,14 +24,24 @@ public:
     void resized() override;
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
+
+
 private:
 
     juce::AudioProcessorValueTreeState& valueTreeState;
 
     Gui::PresetPanel presetPanel;
 
-    //std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
-
+    //btn
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> tubeOnAtt      ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> cabOnAtt       ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> distOnAtt      ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbOnAtt    ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> ng2OnAtt       ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> ng1OnAtt       ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> delayOnAtt     ;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> tunerOnAtt     ;
+    //slider
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeMixAtt      ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tubeBiasAtt     ;
@@ -65,6 +75,12 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPostAtkAtt    ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ngPostRelAtt    ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tightenLpAtt    ;
+
+    //    juce::AudioProcessorValueTreeState::ComboBoxAttachment distSelectAtt;
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> distSelectAtt;
+
+
 
 
     void sliderValueChanged(juce::Slider* slider) override;
@@ -158,16 +174,16 @@ private:
 
     ScopeComponent<float> scopeComponent;
 
-    juce::TextButton bypassCabSim;
-    juce::TextButton bypassVerbBtn;
-    juce::TextButton bypassDistBtn;
-    juce::TextButton bypassTube;
-    juce::TextButton bypassDelay;
-    juce::TextButton bypassNgPre;
-    juce::TextButton bypassNgPost;
-    juce::TextButton tunerBtn;
+    juce::ToggleButton bypassCabSim;
+    juce::ToggleButton bypassVerbBtn;
+    juce::ToggleButton bypassDistBtn;
+    juce::ToggleButton bypassTube;
+    juce::ToggleButton bypassDelay;
+    juce::ToggleButton bypassNgPre;
+    juce::ToggleButton bypassNgPost;
+    juce::ToggleButton tunerBtn;
 
-    juce::TextButton loadIrBtn;
+    juce::ToggleButton loadIrBtn;
 
     juce::ComboBox distSelect;
 
