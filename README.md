@@ -7,6 +7,8 @@ TODOS:<br />
 -~implement noisegates~<br />
 -touch up graphics by learning look and feel<br />
 -add a reverb from scratch<br />
+-add modulation stuff like chorus, flanger<br/>
+-make distortions combinable for cool sounds<br />
 -~implement save states with audio param tree~<br />
 -switch from processorchain to audiograph for flexibility<br />
 -figure out optimized ranges for sliders (you can get some weird effects with some of the current ranges, feature or bug, you decide)<br />
