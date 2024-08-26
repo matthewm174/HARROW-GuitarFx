@@ -23,16 +23,14 @@ void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
     m_fuzzFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
     m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowShelf);
     m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 2000.0);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 10.0);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 1000.0);
+    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 9.0);
 
     m_lofiFilter.prepare(spec);
     m_lofiFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
     m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowPass);
     m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
     m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 10000.0);
-
-
 
     _dcFilter.prepare(spec);
     _dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);
@@ -50,7 +48,7 @@ void Distortion<SampleType>::reset() {
     _rawGain.setTargetValue(1.0);
 
     _input.reset(_sampleRate, 0.02);
-    _input.setTargetValue(0.0);
+    _input.setTargetValue(1.0);
 
     _mix.reset(_sampleRate, 0.02);
     _mix.setTargetValue(1.0);
@@ -69,7 +67,6 @@ void Distortion<SampleType>::reset() {
 template <typename SampleType>
 void Distortion<SampleType>::setDrive(SampleType newDrive) {
     _input.setTargetValue(newDrive);
-    _gainDB.setTargetValue(newDrive);
     _rawGain.setTargetValue(juce::Decibels::decibelsToGain(newDrive));
 }
 

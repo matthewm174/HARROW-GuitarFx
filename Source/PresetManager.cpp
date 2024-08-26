@@ -89,6 +89,7 @@ namespace Service
         const auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
 
         valueTreeState.replaceState(valueTreeToLoad);
+
         currentPreset.setValue(presetName);
 
     }

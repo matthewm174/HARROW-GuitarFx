@@ -38,17 +38,94 @@ DistAdvAudioProcessor::~DistAdvAudioProcessor() {
 }
 
 
-void DistAdvAudioProcessor::updateParameters(int selection) {
-    switch (selection)
-    {
-    case 1: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kHard); break;
-    case 2: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kSoft); break;
-    case 3: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kSat); break;
-    case 4: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kHard2); break;
-    case 5: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kFuzz); break;
-    case 6: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kDiode); break;
-    case 7: processorChain.get<1>().setDistModel(Distortion<float>::DistModel::kLofi); break;
+void DistAdvAudioProcessor::updateParameters() {
+    //ng1
+    auto& ng1Proccessor = processorChain.get<0>();
+    processorChain.setBypassed<0>(harrowParams.getRawParameterValue("ng1On")->load());
+
+    ng1Proccessor.setAttack(harrowParams.getRawParameterValue("ngPreAtk")->load());
+    ng1Proccessor.setRatio(harrowParams.getRawParameterValue("ngPreRatio")->load());
+    ng1Proccessor.setRelease(harrowParams.getRawParameterValue("ngPreRel")->load());
+    ng1Proccessor.setThreshold(harrowParams.getRawParameterValue("ngPreThresh")->load());
+
+    //dist
+    auto& distortionProcessor = processorChain.get<1>();
+    processorChain.setBypassed<1>(harrowParams.getRawParameterValue("distOn")->load());
+    auto dt = static_cast<int>(harrowParams.getRawParameterValue("distType")->load());
+    setDistType(dt);
+    distortionProcessor.setCeiling(harrowParams.getRawParameterValue("driveCeil")->load());
+    distortionProcessor.setDrive(harrowParams.getRawParameterValue("drive")->load());
+    distortionProcessor.setMix(harrowParams.getRawParameterValue("driveMix")->load());
+    distortionProcessor.setThresh(harrowParams.getRawParameterValue("driveThresh")->load());
+    distortionProcessor.setGainKnobVal(harrowParams.getRawParameterValue("gain")->load());
+    distortionProcessor.setOutput(1.0f);
+    distortionProcessor.setFilter(harrowParams.getRawParameterValue("tightenLp")->load());
+
+    //tube
+
+    auto& tubeProcessor = processorChain.get<2>();
+    processorChain.setBypassed<2>(harrowParams.getRawParameterValue("tubeOn")->load());
+    tubeProcessor.setBias(harrowParams.getRawParameterValue("tubeMix")->load());
+    tubeProcessor.setBias(harrowParams.getRawParameterValue("tubeBias")->load());
+    tubeProcessor.setBias(harrowParams.getRawParameterValue("tubeDrive")->load());
+    tubeProcessor.setBias(harrowParams.getRawParameterValue("tubeIn")->load());
+    tubeProcessor.setBias(harrowParams.getRawParameterValue("tubeOut")->load());
+
+    //ng2
+    auto& ng2Proccessor = processorChain.get<3>();
+    processorChain.setBypassed<3>(harrowParams.getRawParameterValue("ng2On")->load());
+
+    ng2Proccessor.setAttack(harrowParams.getRawParameterValue("ngPostAtk")->load());
+    ng2Proccessor.setRatio(harrowParams.getRawParameterValue("ngPostRatio")->load());
+    ng2Proccessor.setRelease(harrowParams.getRawParameterValue("ngPostRel")->load());
+    ng2Proccessor.setThreshold(harrowParams.getRawParameterValue("ngPostThresh")->load());
+
+
+    //cab
+    auto& cabProcessor = processorChain.get<4>();
+    processorChain.setBypassed<4>(harrowParams.getRawParameterValue("cabOn")->load());
+    //auto* isSet = /*harrowParams.getRawParameterValue*/("irFile");
+    if(harrowParams.state.hasProperty("irFile")) {
+        juce::String filepath = harrowParams.state.getProperty("irFile").toString();
+        juce::File savedFile(filepath);
+        cabProcessor.changeIr(savedFile);
     }
+
+    //EQs
+    auto& eq1Processor = processorChain.get<5>();
+    //processorChain.setBypassed<5>(harrowParams.getRawParameterValue("eq")->load());
+
+    eq1Processor.setFreq(harrowParams.getRawParameterValue("midEqFreq")->load());
+    eq1Processor.setQ(harrowParams.getRawParameterValue("midEqQ")->load());
+    eq1Processor.setGain(harrowParams.getRawParameterValue("midEqGain")->load());
+
+
+    auto& eq2Processor = processorChain.get<6>();
+    eq2Processor.setFreq(harrowParams.getRawParameterValue("hiEqFreq")->load());
+    eq2Processor.setQ(harrowParams.getRawParameterValue("hiEqQ")->load());
+    eq2Processor.setGain(harrowParams.getRawParameterValue("hiEqGain")->load());
+
+
+    //verb
+    auto& verbProcessor = processorChain.get<7>();
+    processorChain.setBypassed<7>(harrowParams.getRawParameterValue("reverbOn")->load());
+
+    juce::dsp::Reverb::Parameters params;
+    params.roomSize = harrowParams.getRawParameterValue("reverbRoom")->load();
+    params.damping = harrowParams.getRawParameterValue("reverbDamp")->load();
+    params.width = harrowParams.getRawParameterValue("reverbWidth")->load();
+    params.wetLevel = harrowParams.getRawParameterValue("reverbWet")->load();
+    params.dryLevel = harrowParams.getRawParameterValue("reverbDry")->load();
+    verbProcessor.setParameters(params);
+    //delay
+    auto& delayProcessor = processorChain.get<8>();
+    processorChain.setBypassed<8>(harrowParams.getRawParameterValue("delayOn")->load());
+    delayProcessor.setDelayTime(harrowParams.getRawParameterValue("delayTime")->load());
+    delayProcessor.setFeedback(harrowParams.getRawParameterValue("delayFeedback")->load());
+    delayProcessor.setWetMix(harrowParams.getRawParameterValue("delayWet")->load());
+    
+
+
 }
 
 
@@ -125,8 +202,10 @@ void DistAdvAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock
     oscillator.setFrequency(440.0f);
     processorChain.get<5>().setType(EqType::PEQ);
     processorChain.get<6>().setType(EqType::PEQ);
+    updateParameters();
 
     processorChain.prepare(spec);
+
 
 }
 
@@ -277,6 +356,9 @@ void DistAdvAudioProcessor::setStateInformation(const void* data, int sizeInByte
         return;
     const auto newTree = juce::ValueTree::fromXml(*xmlState);
     harrowParams.replaceState(newTree);
+    //if (harrowParams.state.getProperty("irFile")) {
+    //    DBG("Test");
+    //}
 
 }
 
@@ -306,7 +388,7 @@ void DistAdvAudioProcessor::setMidQ(float _q)
 {
     processorChain.get<5>().setQ(_q);
 }
-
+ 
 void DistAdvAudioProcessor::setMidGain(float _freq)
 {
     processorChain.get<5>().setGain(_freq);
@@ -336,6 +418,21 @@ void DistAdvAudioProcessor::setCeiling(float ceil)
 void DistAdvAudioProcessor::setThresh(float tr)
 {
     processorChain.get<1>().setThresh(tr);
+}
+
+void DistAdvAudioProcessor::setDistType(int selection)
+{
+    auto& distortionProcessor = processorChain.get<1>();
+    switch (selection)
+    {
+        case 0: distortionProcessor.setDistModel(Distortion<float>::DistModel::kHard); break;
+        case 1: distortionProcessor.setDistModel(Distortion<float>::DistModel::kSoft); break;
+        case 2: distortionProcessor.setDistModel(Distortion<float>::DistModel::kSat); break;
+        case 3: distortionProcessor.setDistModel(Distortion<float>::DistModel::kHard2); break;
+        case 4: distortionProcessor.setDistModel(Distortion<float>::DistModel::kFuzz); break;
+        case 5: distortionProcessor.setDistModel(Distortion<float>::DistModel::kDiode); break;
+        case 6: distortionProcessor.setDistModel(Distortion<float>::DistModel::kLofi); break;
+    }
 }
 
 void DistAdvAudioProcessor::setFilterInFreq(float freq) {
@@ -371,8 +468,9 @@ void DistAdvAudioProcessor::setTubeOutputGain(float tubeog) {
 
 void DistAdvAudioProcessor::setCab(juce::File f)
 {
+    harrowParams.state.setProperty("irFile", f.getFullPathName(), nullptr);
     processorChain.get<4>().reset();
-    return processorChain.get<4>().changeIr(f);
+    processorChain.get<4>().changeIr(f);
 }
 
 
@@ -453,6 +551,8 @@ void DistAdvAudioProcessor::setNgPostRel(float ngpostr)
 
 void DistAdvAudioProcessor::bypassNgPre(bool a)
 {
+    //apvts.state.setProperty(parameterID, value, nullptr);
+    //harrowParams.state.
     processorChain.setBypassed<0>(a);
 }
 void DistAdvAudioProcessor::bypassDist(bool a)

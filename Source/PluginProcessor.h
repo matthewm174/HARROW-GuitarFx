@@ -86,7 +86,7 @@ public:
     void setMix(float newMix);
     void setCeiling(float newCeil);
     void setThresh(float newThresh);
-
+    void setDistType(int selection);
     void setReverbParameters(const juce::dsp::Reverb::Parameters& params);
     void bypassReverb(bool);
     void bypassCab(bool);
@@ -100,7 +100,7 @@ public:
     void bypassNgPost(bool);
     void setCab(juce::File f);
     juce::File root, saveFile;
-    void updateParameters(int selection);
+    void updateParameters();
     void setTubeDrive(float tubedr);
     void setTubeBias(float tubebias);
     void setTubeMix(float tubemix);

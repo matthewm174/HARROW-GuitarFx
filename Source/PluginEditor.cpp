@@ -418,10 +418,9 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     ng1OnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "ng1On",                bypassNgPre       );
     ng2OnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "ng2On",                bypassNgPost       );
     tunerOnAtt         = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(valueTreeState,             "tunerOn",                tunerBtn      );
-
-
-
     distSelectAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(valueTreeState,             "distType",                distSelect      );
+
+    
 
 
 }
@@ -775,8 +774,13 @@ void DistAdvAudioProcessorEditor::buttonClicked(juce::Button* btn) {
         audioProcessor.bypassNgPost(a);
     }
     if (btn == &loadIrBtn) {
-        filechooser = std::make_unique<juce::FileChooser>("Choose File", audioProcessor.root, "*");
 
+
+        //else {
+
+        //}
+
+        filechooser = std::make_unique<juce::FileChooser>("Choose File", audioProcessor.root, "*");
         const auto fileChooserFlags = juce::FileBrowserComponent::openMode |
             juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectDirectories;
 
@@ -784,7 +788,9 @@ void DistAdvAudioProcessorEditor::buttonClicked(juce::Button* btn) {
             {
                 juce::File result(chooser.getResult());
                 if (result.getFileExtension() == ".wav") {
+
                     audioProcessor.saveFile = result;
+
                     audioProcessor.root = result.getParentDirectory().getFullPathName();
                     audioProcessor.setCab(audioProcessor.saveFile);
 
@@ -799,9 +805,6 @@ void DistAdvAudioProcessorEditor::comboBoxChanged(juce::ComboBox* comboBoxThatHa
     if (comboBoxThatHasChanged == &distSelect)
     {
         int selectedId = distSelect.getSelectedId();
-        // Handle the selection change here
-        audioProcessor.updateParameters(selectedId);
-
-        juce::Logger::writeToLog("Selected ID: " + juce::String(selectedId));
+        audioProcessor.setDistType(selectedId-1);
     }
 }

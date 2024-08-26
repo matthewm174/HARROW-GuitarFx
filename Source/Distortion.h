@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "StateVariableFilter.h"
+//#include "PluginProcessor.h"
 
 template <typename SampleType>
 class Distortion {
@@ -232,7 +233,7 @@ public:
 
 
 private:
-    juce::SmoothedValue<float> _rawGain;
+    juce::SmoothedValue<float> _rawGain = 1.0f;
     juce::SmoothedValue<float> _input;
     juce::SmoothedValue<float> _mix;
     juce::SmoothedValue<float> _output;
