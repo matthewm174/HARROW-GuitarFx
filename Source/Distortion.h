@@ -45,7 +45,6 @@ public:
     void setGainKnobVal(SampleType newGain);
     void setMix(SampleType newMix);
     void setFilter(SampleType filterfreq);
-    void setOutput(SampleType newOutput);
 
     void setThresh(SampleType newThresh);
     void setCeiling(SampleType newCeiling);
@@ -58,8 +57,8 @@ public:
 
     SampleType processHardClip2(SampleType dataToClip, bool useDrive, int channel)
     {
-        auto wetSignal = dataToClip * gainKnobVal.getNextValue();
-
+        auto wetSignal = dataToClip;//*gainKnobVal.getNextValue();
+        wetSignal *= gainKnobVal.getNextValue();
         if (useDrive)
         {
             wetSignal *= _rawGain.getNextValue();
@@ -73,7 +72,7 @@ public:
         }
 
 
-        wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * .2);
+        wetSignal *= juce::Decibels::decibelsToGain(-1.0 * .2);
 
         auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
 
@@ -83,17 +82,18 @@ public:
 
     SampleType processHardClipper(SampleType inputSample, int channel) {
         
-        auto wetSig =inputSample * juce::Decibels::decibelsToGain(_input.getNextValue()) * gainKnobVal.getNextValue();
+        auto wetSig = inputSample * juce::Decibels::decibelsToGain(_input.getNextValue());//*gainKnobVal.getNextValue();
 
+        wetSig *= gainKnobVal.getNextValue();
         if (std::abs(wetSig) > 0.50) {
             wetSig *= 0.50 / std::abs(wetSig);
         }
 
-        wetSig *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * .20);
+        wetSig *= juce::Decibels::decibelsToGain(-1.0 * .1);
 
         auto mix = (1.0 - _mix.getNextValue()) * inputSample + wetSig * _mix.getNextValue();
 
-        return mix * juce::Decibels::decibelsToGain(_output.getNextValue());
+        return mix * juce::Decibels::decibelsToGain(1.0);
 
     }
 
@@ -124,7 +124,7 @@ public:
             wetSignal = processSoftClipper(wetSignal, true, channel);
         }
 
-        wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * 0.2); 
+        wetSignal *= juce::Decibels::decibelsToGain(-1 * 0.2); 
 
         
         auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
@@ -143,7 +143,7 @@ public:
 
         wetSignal *= 0.5;
 
-        wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * 0.2);
+        wetSignal *= juce::Decibels::decibelsToGain(-1.0 * 0.2);
 
         auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
 
@@ -154,8 +154,8 @@ public:
     SampleType processSoftClipper(SampleType dataToClip, bool useDrive, int channel)
     {
 
-        auto wetSignal = dataToClip * gainKnobVal.getNextValue();
-
+        auto wetSignal = dataToClip;//*gainKnobVal.getNextValue();
+        wetSignal *= gainKnobVal.getNextValue();
         if (useDrive)
         {
             wetSignal *= _rawGain.getNextValue();
@@ -168,7 +168,7 @@ public:
             wetSignal *= 2.0;
             
         }
-        wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * 0.2);
+        wetSignal *= juce::Decibels::decibelsToGain(-1.0 * 0.2);
 
         // Mix dry with wet
         auto mix = (1.0 - _mix.getNextValue()) * dataToClip + wetSignal * _mix.getNextValue();
@@ -195,7 +195,7 @@ public:
 
         wetSignal *= 1.5;
 
-        wetSignal *= juce::Decibels::decibelsToGain(-_gainDB.getNextValue() * 0.2);
+        wetSignal *= juce::Decibels::decibelsToGain(-1.0 * 0.2);
 
         // Mix dry with wet
         auto mix = (1.0 - _mix.getNextValue()) * dataToClip + processSoftClipper(wetSignal - bias, false, channel) * _mix.getNextValue();
@@ -212,14 +212,14 @@ public:
 
         if (wetSignal < 0)
         {
-            wetSignal *= juce::jmap(_gainDB.getNextValue(), 0.0f, 20.0f, 1.0f, -1.0f);
+            wetSignal *= juce::jmap(1.0f, 0.0f, 20.0f, 1.0f, -1.0f);
         }
 
 
         wetSignal = processSoftClipper(wetSignal, false, channel);
 
 
-        wetSignal *= juce::Decibels::decibelsToGain(_gainDB.getNextValue() * 0.2);
+        wetSignal *= juce::Decibels::decibelsToGain(-1.0 * 0.2);
 
 
         wetSignal = processHardClip2(m_lofiFilter.processSample(wetSignal, channel), false,  channel);
@@ -233,15 +233,12 @@ public:
 
 
 private:
-    juce::SmoothedValue<float> _rawGain = 1.0f;
+    juce::SmoothedValue<float> _rawGain;
     juce::SmoothedValue<float> _input;
     juce::SmoothedValue<float> _mix;
-    juce::SmoothedValue<float> _output;
-    juce::SmoothedValue<float> _gainDB;
     juce::SmoothedValue<float> _thresh;
     juce::SmoothedValue<float> _ceiling;
     juce::SmoothedValue<float> _lowcut;
-
     juce::SmoothedValue<float> gainKnobVal;
 
     static constexpr float _piRaw = juce::MathConstants<float>::pi;

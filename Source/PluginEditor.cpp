@@ -54,7 +54,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     mixSlider.setRange(0.0f, 1.0f);
     threshSlider.setRange(0.0f, 1.0f);
     reverbWidthSlider.setRange(0.0f, 1.0f);
-    reverbDryLevel.setRange(0.0f, 1.0f);
+    //reverbDryLevel.setRange(0.0f, 1.0f);
     reverbWetLevel.setRange(0.0f, 1.0f);
     reverbDampingSlider.setRange(0.0f, 1.0f);
     tubeMix.setRange(0.0f, 1.0f, .1f);
@@ -126,7 +126,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     addAndMakeVisible(mixSlider);
     addAndMakeVisible(threshSlider);
     addAndMakeVisible(reverbWidthSlider);
-    addAndMakeVisible(reverbDryLevel);
+    //addAndMakeVisible(reverbDryLevel);s
     addAndMakeVisible(reverbWetLevel);
     addAndMakeVisible(reverbDampingSlider);
     addAndMakeVisible(reverbRoomSizeSlider);
@@ -190,7 +190,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     mixSlider.addListener(this);
     threshSlider.addListener(this);
     reverbWidthSlider.addListener(this);
-    reverbDryLevel.addListener(this);
+    //reverbDryLevel.addListener(this);
     reverbWetLevel.addListener(this);
     reverbDampingSlider.addListener(this);
     reverbRoomSizeSlider.addListener(this);
@@ -395,7 +395,7 @@ DistAdvAudioProcessorEditor::DistAdvAudioProcessorEditor
     reverbDampAtt        = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbDamp",               reverbDampingSlider   );
     reverbWidthAtt       = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbWidth",              reverbWidthSlider     );
     reverbWetAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbWet",                reverbWetLevel        );
-    reverbDryAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbDry",                reverbDryLevel        );
+    //reverbDryAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "reverbDry",                reverbDryLevel        );
     driveAtt             = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "drive",                    driveSlider           );
     driveThreshAtt       = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "driveThresh",              threshSlider          );
     driveCeilAtt         = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(valueTreeState,             "driveCeil",                ceilingSlider         );
@@ -442,7 +442,7 @@ DistAdvAudioProcessorEditor::~DistAdvAudioProcessorEditor()
     midEqFreqKnob           .removeListener(this);
     midEqQKnob              .removeListener(this);
     midEqGainKnob           .removeListener(this);
-    reverbDryLevel          .removeListener(this);
+    //reverbDryLevel          .removeListener(this);
     reverbWetLevel          .removeListener(this);
     lowpassInSlider         .removeListener(this);
     ceilingSlider           .removeListener(this);
@@ -552,7 +552,7 @@ void DistAdvAudioProcessorEditor::resized()
     reverbDampingSlider.setBounds(20,       380, 300, 20);
     reverbWidthSlider.setBounds(20,         400, 300, 20);
     reverbWetLevel.setBounds(20,            420, 300, 20);
-    reverbDryLevel.setBounds(20,            440, 300, 20);
+    //reverbDryLevel.setBounds(20,            440, 300, 20);
 
     midEqFreqKnob.setBounds(20, 460, 300, 20);
     midEqGainKnob.setBounds(20, 480, 300, 20);
@@ -619,160 +619,160 @@ void DistAdvAudioProcessorEditor::resized()
 }
 void DistAdvAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
-    if (slider == &reverbRoomSizeSlider 
-        || slider == &reverbDampingSlider 
-        || slider == &reverbWetLevel 
-        || slider == &reverbWidthSlider
-        || slider == &reverbDryLevel)
-    {
-        juce::dsp::Reverb::Parameters params;
-        params.roomSize = reverbRoomSizeSlider.getValue();
-        params.damping = reverbDampingSlider.getValue();
-        params.width = reverbWidthSlider.getValue();
-        params.wetLevel = reverbWetLevel.getValue();
-        params.dryLevel = reverbDryLevel.getValue();
-        audioProcessor.setReverbParameters(params);
-    }
-    if (slider == &gainKnob) {
-        audioProcessor.setGainKnob(gainKnob.getValue());
-    }
-    if (slider == &driveSlider) {
-        audioProcessor.setDist(driveSlider.getValue());
-    }
-    if (slider == &lowpassInSlider) {
-        audioProcessor.setFilterInFreq(lowpassInSlider.getValue());
-    }
-    if (slider == &tubeDrive) {
-        audioProcessor.setTubeDrive(tubeDrive.getValue());
-    }
-    if (slider == &tubeIG) {
-        audioProcessor.setTubeInputGain(tubeIG.getValue());
-    }
-    if (slider == &tubeOG) {
-        audioProcessor.setTubeOutputGain(tubeOG.getValue());
-    }
-    if (slider == &tubeBias) {
-        audioProcessor.setTubeBias(tubeBias.getValue());
-    }
-    if (slider == &tubeMix) {
-        audioProcessor.setTubeMix(tubeMix.getValue());
-    }
-    if (slider == &ceilingSlider) {
-        audioProcessor.setCeiling(ceilingSlider.getValue());
-    }
-    if (slider == &threshSlider) {
-        audioProcessor.setThresh(threshSlider.getValue());
-    }
-    if (slider == &delayTime) {
-        audioProcessor.setDelay(delayTime.getValue());
-    }
-    if (slider == &delayFeedback) {
-        audioProcessor.setDelayFb(delayFeedback.getValue());
-    }
-    if (slider == &delayWet) {
-        audioProcessor.setDelayWet(delayWet.getValue());
-    }
-    if (slider == &ngPreThreshSlider) {
-        audioProcessor.setNgPreThresh(ngPostThreshSlider.getValue());
-    }
+    //if (slider == &reverbRoomSizeSlider 
+    //    || slider == &reverbDampingSlider 
+    //    || slider == &reverbWetLevel 
+    //    || slider == &reverbWidthSlider
+    //    || slider == &reverbDryLevel)
+    //{
+    //    juce::dsp::Reverb::Parameters params;
+    //    params.roomSize = reverbRoomSizeSlider.getValue();
+    //    params.damping = reverbDampingSlider.getValue();
+    //    params.width = reverbWidthSlider.getValue();
+    //    params.wetLevel = reverbWetLevel.getValue();
+    //    params.dryLevel = reverbDryLevel.getValue();
+    //    audioProcessor.setReverbParameters(params);
+    //}
+    //if (slider == &gainKnob) {
+    //    audioProcessor.setGainKnob(gainKnob.getValue());
+    //}
+    //if (slider == &driveSlider) {
+    //    audioProcessor.setDist(driveSlider.getValue());
+    //}
+    //if (slider == &lowpassInSlider) {
+    //    audioProcessor.setFilterInFreq(lowpassInSlider.getValue());
+    //}
+    //if (slider == &tubeDrive) {
+    //    audioProcessor.setTubeDrive(tubeDrive.getValue());
+    //}
+    //if (slider == &tubeIG) {
+    //    audioProcessor.setTubeInputGain(tubeIG.getValue());
+    //}
+    //if (slider == &tubeOG) {
+    //    audioProcessor.setTubeOutputGain(tubeOG.getValue());
+    //}
+    //if (slider == &tubeBias) {
+    //    audioProcessor.setTubeBias(tubeBias.getValue());
+    //}
+    //if (slider == &tubeMix) {
+    //    audioProcessor.setTubeMix(tubeMix.getValue());
+    //}
+    //if (slider == &ceilingSlider) {
+    //    audioProcessor.setCeiling(ceilingSlider.getValue());
+    //}
+    //if (slider == &threshSlider) {
+    //    audioProcessor.setThresh(threshSlider.getValue());
+    //}
+    //if (slider == &delayTime) {
+    //    audioProcessor.setDelay(delayTime.getValue());
+    //}
+    //if (slider == &delayFeedback) {
+    //    audioProcessor.setDelayFb(delayFeedback.getValue());
+    //}
+    //if (slider == &delayWet) {
+    //    audioProcessor.setDelayWet(delayWet.getValue());
+    //}
+    //if (slider == &ngPreThreshSlider) {
+    //    audioProcessor.setNgPreThresh(ngPostThreshSlider.getValue());
+    //}
 
-    if (slider == &ngPreRatioSlider) {
-        audioProcessor.setNgPreRatio(ngPreRatioSlider.getValue());
-    }
+    //if (slider == &ngPreRatioSlider) {
+    //    audioProcessor.setNgPreRatio(ngPreRatioSlider.getValue());
+    //}
 
-    if (slider == &ngPreAtkSlider) {
-        audioProcessor.setNgPreAtk(ngPreAtkSlider.getValue());
-    }
-    if (slider == &ngPreRelSlider) {
-        audioProcessor.setNgPreRel(ngPreRelSlider.getValue());
-    }
-    // post
-    if (slider == &ngPostThreshSlider) {
-        audioProcessor.setNgPostThresh(ngPostThreshSlider.getValue());
-    }
+    //if (slider == &ngPreAtkSlider) {
+    //    audioProcessor.setNgPreAtk(ngPreAtkSlider.getValue());
+    //}
+    //if (slider == &ngPreRelSlider) {
+    //    audioProcessor.setNgPreRel(ngPreRelSlider.getValue());
+    //}
+    //// post
+    //if (slider == &ngPostThreshSlider) {
+    //    audioProcessor.setNgPostThresh(ngPostThreshSlider.getValue());
+    //}
 
-    if (slider == &ngPostRatioSlider) {
-        audioProcessor.setNgPostRatio(ngPostRatioSlider.getValue());
-    }
+    //if (slider == &ngPostRatioSlider) {
+    //    audioProcessor.setNgPostRatio(ngPostRatioSlider.getValue());
+    //}
 
-    if (slider == &ngPostAtkSlider) {
-        audioProcessor.setNgPreAtk(ngPostAtkSlider.getValue());
-    }
-    if (slider == &ngPostRelSlider) {
-        audioProcessor.setNgPostRel(ngPostRelSlider.getValue());
-    }
-    //eq
-    //     
-    if (slider == &hiEqFreqKnob) {
-        audioProcessor.setHiFreq(hiEqFreqKnob.getValue());
-    }
-    if (slider == &hiEqQKnob) {
-        audioProcessor.setHiQ(hiEqQKnob.getValue());
-    }
-    if (slider == &hiEqGainKnob) {
-        audioProcessor.setHiGain(hiEqGainKnob.getValue());
-    }
-    //setMidFreq
-    if (slider == &midEqFreqKnob) {
-        audioProcessor.setMidFreq(midEqFreqKnob.getValue());
-    }
-    if (slider == &midEqQKnob) {
-        audioProcessor.setMidQ(midEqQKnob.getValue());
-    }
-    if (slider == &midEqGainKnob) {
-        audioProcessor.setMidGain(midEqGainKnob.getValue());
-    }
+    //if (slider == &ngPostAtkSlider) {
+    //    audioProcessor.setNgPreAtk(ngPostAtkSlider.getValue());
+    //}
+    //if (slider == &ngPostRelSlider) {
+    //    audioProcessor.setNgPostRel(ngPostRelSlider.getValue());
+    //}
+    ////eq
+    ////     
+    //if (slider == &hiEqFreqKnob) {
+    //    audioProcessor.setHiFreq(hiEqFreqKnob.getValue());
+    //}
+    //if (slider == &hiEqQKnob) {
+    //    audioProcessor.setHiQ(hiEqQKnob.getValue());
+    //}
+    //if (slider == &hiEqGainKnob) {
+    //    audioProcessor.setHiGain(hiEqGainKnob.getValue());
+    //}
+    ////setMidFreq
+    //if (slider == &midEqFreqKnob) {
+    //    audioProcessor.setMidFreq(midEqFreqKnob.getValue());
+    //}
+    //if (slider == &midEqQKnob) {
+    //    audioProcessor.setMidQ(midEqQKnob.getValue());
+    //}
+    //if (slider == &midEqGainKnob) {
+    //    audioProcessor.setMidGain(midEqGainKnob.getValue());
+    //}
 
 }
 
 void DistAdvAudioProcessorEditor::buttonClicked(juce::Button* btn) {
-    juce::Button& currBtnRef = *btn;
-    if (btn == &bypassVerbBtn)
+    //juce::Button& currBtnRef = *btn;
+    //if (btn == &bypassVerbBtn)
 
-    {
-        auto a = currBtnRef.getToggleState();
-        audioProcessor.bypassReverb(a);
-    }
-    
-    if (btn == &tunerBtn)
-    {
-        auto a = currBtnRef.getToggleState();
+    //{
+    //    auto a = currBtnRef.getToggleState();
+    //    audioProcessor.bypassReverb(a);
+    //}
+    //
+    //if (btn == &tunerBtn)
+    //{
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassTuner(a);
-    }
+    //    audioProcessor.bypassTuner(a);
+    //}
 
-    if (btn == &bypassCabSim)
-    {
-        auto a = currBtnRef.getToggleState();
+    //if (btn == &bypassCabSim)
+    //{
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassCab(a);
-    }
-    if (btn == &bypassDistBtn)
-    {
-        auto a = currBtnRef.getToggleState();
+    //    audioProcessor.bypassCab(a);
+    //}
+    //if (btn == &bypassDistBtn)
+    //{
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassDist(a);
-    }
-    if (btn == &bypassTube) {
-        auto a = currBtnRef.getToggleState();
+    //    audioProcessor.bypassDist(a);
+    //}
+    //if (btn == &bypassTube) {
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassTube(a);
-    }
-    if (btn == &bypassDelay) {
-        auto a = currBtnRef.getToggleState();
+    //    audioProcessor.bypassTube(a);
+    //}
+    //if (btn == &bypassDelay) {
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassDelay(a);
-    }
-    if (btn == &bypassNgPre) {
-        auto a = currBtnRef.getToggleState();
+    //    audioProcessor.bypassDelay(a);
+    //}
+    //if (btn == &bypassNgPre) {
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassNgPre(a);
-    }
-    if (btn == &bypassNgPost) {
-        auto a = currBtnRef.getToggleState();
+    //    audioProcessor.bypassNgPre(a);
+    //}
+    //if (btn == &bypassNgPost) {
+    //    auto a = currBtnRef.getToggleState();
 
-        audioProcessor.bypassNgPost(a);
-    }
+    //    audioProcessor.bypassNgPost(a);
+    //}
     if (btn == &loadIrBtn) {
 
 

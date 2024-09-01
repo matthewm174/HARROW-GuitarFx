@@ -30,12 +30,6 @@ void ReverbEffect<SampleType>::reset()
 template <typename SampleType>
 void ReverbEffect<SampleType>::process(juce::dsp::ProcessContextReplacing<float>& context)
 {
-    //const auto& inputBlock = context.getInputBlock();
-    //if (context.isBypassed)
-    //{
-    //    outputBlock.copyFrom(inputBlock);
-    //    return;
-    //}
     reverb.process(context);
 }
 
@@ -43,6 +37,12 @@ template <typename SampleType>
 void ReverbEffect<SampleType>::setParameters(const juce::dsp::Reverb::Parameters& newParams)
 {
     reverb.setParameters(newParams);
+}
+
+template <typename SampleType>
+juce::Reverb::Parameters ReverbEffect<SampleType>::getParameters()
+{
+    return reverb.getParameters();
 }
 
 // Explicit template instantiation

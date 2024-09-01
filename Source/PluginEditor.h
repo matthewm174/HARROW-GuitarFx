@@ -61,7 +61,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDampAtt   ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAtt  ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWetAtt    ;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDryAtt    ;
+    //std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDryAtt    ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAtt        ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveThreshAtt  ;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveCeilAtt    ;
@@ -99,7 +99,7 @@ private:
     juce::Slider reverbDampingSlider;
     juce::Slider reverbWidthSlider;
     juce::Slider reverbWetLevel;
-    juce::Slider reverbDryLevel;
+    //juce::Slider reverbDryLevel;
     juce::Slider driveSlider;
     juce::Slider ngPreThreshSlider;
     juce::Slider ngPreRatioSlider;

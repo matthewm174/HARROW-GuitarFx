@@ -21,15 +21,14 @@
 //==============================================================================
 
 class DistAdvAudioProcessor 
-    : public juce::AudioProcessor
+    : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener
 {
 public:
 
 
     DistAdvAudioProcessor();
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
     ~DistAdvAudioProcessor() override;
-
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 

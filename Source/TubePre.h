@@ -44,8 +44,6 @@ public:
 
                 auto* input = inputBlock.getChannelPointer(channel);
                 auto* output = outputBlock.getChannelPointer(channel);
-                //auto* output = outputBlock.getChannelPointer(channel);
-                //output[sample] = processSamples(input[sample], channel);
                 output[sample] = processSamples(input[sample], channel);
             }
         }

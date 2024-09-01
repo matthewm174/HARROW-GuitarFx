@@ -11,6 +11,9 @@ public:
     void process(juce::dsp::ProcessContextReplacing<float>& context);
     void setParameters(const juce::dsp::Reverb::Parameters& newParams);
 
+    juce::Reverb::Parameters getParameters();
+
+
 private:
     juce::dsp::Reverb reverb;
 };
