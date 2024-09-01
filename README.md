@@ -4,6 +4,7 @@ TODOS:<br />
 -~~fix stereo issue~~- this issue is caused by not adding "{2, 2}, {1, 2}" as the plugin channel config in projucer, as well as i wasnt routing mono to both channels, this is a guitar amp afterall.<br /> 
 -~implement eq~<br />
 -implement dk method circuits<br/>
+-~implement meters~<br/>
 -~implement noisegates~<br />
 -touch up graphics by learning look and feel<br />
 -add a reverb from scratch<br />
