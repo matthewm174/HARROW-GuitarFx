@@ -11,7 +11,7 @@
 #include "Distortion.h"
 template <typename SampleType>
 Distortion<SampleType>::Distortion()
-    : _sampleRate(0), _model(DistModel::kHard)
+    : _sampleRate(0), model(DistModel::kHard)
 {
 }
 
@@ -19,18 +19,18 @@ template <typename SampleType>
 void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
     _sampleRate = spec.sampleRate;
 
-    m_fuzzFilter.prepare(spec);
-    m_fuzzFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowShelf);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 1000.0);
-    m_fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 9.0);
+    fuzzFilter.prepare(spec);
+    fuzzFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
+    fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowShelf);
+    fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
+    fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 1000.0);
+    fuzzFilter.setParameter(StateVariableFilter<float>::ParameterId::kGain, 9.0);
 
-    m_lofiFilter.prepare(spec);
-    m_lofiFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
-    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowPass);
-    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
-    m_lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 10000.0);
+    lofiFilter.prepare(spec);
+    lofiFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
+    lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kType, StateVariableFilter<float>::FilterType::kLowPass);
+    lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
+    lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 10000.0);
 
     _dcFilter.prepare(spec);
     _dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);
@@ -44,35 +44,35 @@ void Distortion<SampleType>::reset() {
     if (_sampleRate <= 0) {
         return;
     }
-    _rawGain.reset(_sampleRate, 0.02);
-    _rawGain.setTargetValue(1.0);
+    rawGain.reset(_sampleRate, 0.02);
+    rawGain.setTargetValue(1.0);
 
-    _lowcut.reset(_sampleRate, 0.02);
+    lowcut.reset(_sampleRate, 0.02);
 
-    _lowcut.setTargetValue(1.0);
+    lowcut.setTargetValue(1.0);
 
 
-    _input.reset(_sampleRate, 0.02);
-    _input.setTargetValue(1.0);
+    input.reset(_sampleRate, 0.02);
+    input.setTargetValue(1.0);
 
-    _mix.reset(_sampleRate, 0.02);
-    _mix.setTargetValue(1.0);
+    mix.reset(_sampleRate, 0.02);
+    mix.setTargetValue(1.0);
 
-    //gainKnobVal.reset(_sampleRate, 0.02);
-    //gainKnobVal.setTargetValue(1.0);
+    gainKnobVal.reset(_sampleRate, 0.02);
+    gainKnobVal.setTargetValue(1.0);
 
-    _ceiling.reset(_sampleRate, .02);
-    _ceiling.setTargetValue(1.0);
+    ceiling.reset(_sampleRate, .02);
+    ceiling.setTargetValue(1.0);
 
-    _thresh.reset(_sampleRate, 0.02);
-    _thresh.setTargetValue(1.0);
+    thresh.reset(_sampleRate, 0.02);
+    thresh.setTargetValue(1.0);
 
 }
 
 template <typename SampleType>
 void Distortion<SampleType>::setDrive(SampleType newDrive) {
-    _input.setTargetValue(newDrive);
-    _rawGain.setTargetValue(juce::Decibels::decibelsToGain(newDrive));
+    input.setTargetValue(newDrive);
+    rawGain.setTargetValue(juce::Decibels::decibelsToGain(newDrive));
 }
 
 template<typename SampleType>
@@ -83,7 +83,7 @@ void Distortion<SampleType>::setGainKnobVal(SampleType newGain)
 
 template <typename SampleType>
 void Distortion<SampleType>::setMix(SampleType newMix) {
-    _mix.setTargetValue(newMix);
+    mix.setTargetValue(newMix);
 }
 
 template <typename SampleType>
@@ -94,13 +94,13 @@ void Distortion<SampleType>::setFilter(SampleType filterfreq) {
 
 template <typename SampleType>
 void Distortion<SampleType>::setCeiling(SampleType newCeil) {
-    _ceiling.setTargetValue(newCeil);
+    ceiling.setTargetValue(newCeil);
 
 }
 
 template <typename SampleType>
 void Distortion<SampleType>::setThresh(SampleType newTresh) {
-    _thresh.setTargetValue(newTresh);
+    thresh.setTargetValue(newTresh);
 }
 
 
@@ -109,42 +109,42 @@ void Distortion<SampleType>::setDistModel(DistModel newDistModel) {
     switch (newDistModel) {
         case DistModel::kHard:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kSoft:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kSat:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kHard2:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kFuzz:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kDiode:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kLofi:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
         case DistModel::kTube:
         {
-            _model = newDistModel;
+            model = newDistModel;
             break;
         }
 
@@ -154,7 +154,7 @@ void Distortion<SampleType>::setDistModel(DistModel newDistModel) {
 template <typename SampleType>
 SampleType Distortion<SampleType>::processSaturation(SampleType inputSample, int ch)
 {
-    switch (_model)
+    switch (model)
     {
     case DistModel::kHard:
         return processHardClipper(inputSample, ch) * juce::Decibels::decibelsToGain(1.0);// implement gain stage
