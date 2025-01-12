@@ -12,9 +12,7 @@
 #include "Distortion.h"
 #include "CabSim.h"
 #include "Oscilloscope.h"
-#include "Reverb.h"
 #include "TubePre.h"
-#include "Delay.h"
 #include "NoiseGateEffect.h"
 #include "BiquadEq.h"
 #include "PresetManager.h"
@@ -86,15 +84,12 @@ public:
     void setCeiling(float newCeil);
     void setThresh(float newThresh);
     void setDistType(int selection);
-    void setReverbParameters(const juce::dsp::Reverb::Parameters& params);
-    void bypassReverb(bool);
     void bypassCab(bool);
     void bypassDist(bool);
     void bypassTube(bool);
     bool bypassTuner(bool);
     //void toggleState(juce::String param);
     //bool getToggleState(juce::String param);
-    void bypassDelay(bool);
     void bypassNgPre(bool);
     void bypassNgPost(bool);
     void setCab(juce::File f);
@@ -106,9 +101,6 @@ public:
     void setTubeInputGain(float tubeig);
     void setTubeOutputGain(float tubeog);
     void setFilterInFreq(float freq);
-    void setDelay(float delaytime);
-    void setDelayFb(float delaytime);
-    void setDelayWet(float delaytime);
 
 
     void setNgPreThresh(float ngpret);
@@ -136,10 +128,11 @@ private:
     // Static chain of effects, might make this dynamic eventually with graphs
     juce::dsp::ProcessorChain<NoiseGateEffect<float>, Distortion<float>, TubePre<float>, 
         NoiseGateEffect<float>, CabSimulator<float>, BiquadEQ<float>, 
-        BiquadEQ<float>, ReverbEffect<float>, DelayEffect<float>> processorChain;
+        BiquadEQ<float>> processorChain;
 
     std::unique_ptr<Service::PresetManager> presetManager;
 
+    double hostBpm{ 120 };
     //tuner settings
     float  tunerSampleRate = 0;
     int    tunerRecordSize = 2000;

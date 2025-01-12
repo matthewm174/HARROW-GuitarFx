@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    NoiseGate.h
-    Created: 14 Aug 2024 11:14:34pm
-    Author:  mattm
-
-  ==============================================================================
-*/
-
 #include <JuceHeader.h>
 
 template <typename SampleType>
@@ -26,9 +16,6 @@ public:
 
 private:
     juce::dsp::NoiseGate<float> noiseGate;
-    juce::SmoothedValue<float> _ngThresh;
-    juce::SmoothedValue<float> _ngRatio;
-    juce::SmoothedValue<float> _ngAtk;
-    juce::SmoothedValue<float> _ngRel;
+
 };
 

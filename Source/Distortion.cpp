@@ -1,23 +1,13 @@
-/*
-  ==============================================================================
-
-    Distortion.cpp
-    Created: 29 Jul 2024 9:15:19pm
-    Author:  mattm
-
-  ==============================================================================
-*/
-
 #include "Distortion.h"
 template <typename SampleType>
 Distortion<SampleType>::Distortion()
-    : _sampleRate(0), model(DistModel::kHard)
+    : sampleRate(0), model(DistModel::kHard)
 {
 }
 
 template <typename SampleType>
 void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
-    _sampleRate = spec.sampleRate;
+    sampleRate = spec.sampleRate;
 
     fuzzFilter.prepare(spec);
     fuzzFilter.setStereoType(StateVariableFilter<float>::StereoId::kStereo);
@@ -32,40 +22,38 @@ void Distortion<SampleType>::prepare(const juce::dsp::ProcessSpec& spec) {
     lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kQType, StateVariableFilter<float>::QType::kParametric);
     lofiFilter.setParameter(StateVariableFilter<float>::ParameterId::kCutoff, 10000.0);
 
-    _dcFilter.prepare(spec);
-    _dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);
-    //_dcFilter.setCutoffFrequency(20.0f);
-    
+    dcFilter.prepare(spec);
+    dcFilter.setType(juce::dsp::LinkwitzRileyFilter<float>::Type::highpass);    
     reset();
 }
 
 template <typename SampleType>
 void Distortion<SampleType>::reset() {
-    if (_sampleRate <= 0) {
+    if (sampleRate <= 0) {
         return;
     }
-    rawGain.reset(_sampleRate, 0.02);
+    rawGain.reset(sampleRate, 0.02);
     rawGain.setTargetValue(1.0);
 
-    lowcut.reset(_sampleRate, 0.02);
+    lowcut.reset(sampleRate, 0.02);
 
     lowcut.setTargetValue(1.0);
 
 
-    input.reset(_sampleRate, 0.02);
+    input.reset(sampleRate, 0.02);
     input.setTargetValue(1.0);
 
-    mix.reset(_sampleRate, 0.02);
+    mix.reset(sampleRate, 0.02);
     mix.setTargetValue(1.0);
 
-    gainKnobVal.reset(_sampleRate, 0.02);
+    gainKnobVal.reset(sampleRate, 0.02);
     gainKnobVal.setTargetValue(1.0);
 
-    ceiling.reset(_sampleRate, .02);
+    ceiling.reset(sampleRate, .02);
     ceiling.setTargetValue(1.0);
 
-    thresh.reset(_sampleRate, 0.02);
-    thresh.setTargetValue(1.0);
+    thresh.reset(sampleRate, 0.02);
+    thresh.setTargetValue(0.2);
 
 }
 
@@ -88,7 +76,7 @@ void Distortion<SampleType>::setMix(SampleType newMix) {
 
 template <typename SampleType>
 void Distortion<SampleType>::setFilter(SampleType filterfreq) {
-    _dcFilter.setCutoffFrequency(filterfreq);
+    dcFilter.setCutoffFrequency(filterfreq);
 }
 
 
@@ -157,7 +145,7 @@ SampleType Distortion<SampleType>::processSaturation(SampleType inputSample, int
     switch (model)
     {
     case DistModel::kHard:
-        return processHardClipper(inputSample, ch) * juce::Decibels::decibelsToGain(1.0);// implement gain stage
+        return processHardClipper(inputSample, ch) * juce::Decibels::decibelsToGain(1.0);
         break;
     case DistModel::kSoft:
         return processSoftClipper(inputSample, true, ch) * juce::Decibels::decibelsToGain(1.0);
@@ -209,7 +197,7 @@ void Distortion<SampleType>::process(juce::dsp::ProcessContextReplacing<SampleTy
 
             auto* input = inputBlock.getChannelPointer(channel);
             auto* output = outputBlock.getChannelPointer(channel);
-            output[sample] = processSaturation(_dcFilter.processSample(channel, input[sample]), channel);
+            output[sample] = processSaturation(dcFilter.processSample(channel, input[sample]), channel);
 
         }
     }

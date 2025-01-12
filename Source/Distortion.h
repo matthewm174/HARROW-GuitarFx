@@ -1,17 +1,6 @@
-/*
-  ==============================================================================
-
-    Distortion.h
-    Created: 29 Jul 2024 9:15:19pm
-    Author:  mattm
-
-  ==============================================================================
-*/
-
 #pragma once
 #include <JuceHeader.h>
 #include "StateVariableFilter.h"
-//#include "PluginProcessor.h"
 
 template <typename SampleType>
 class Distortion {
@@ -245,12 +234,12 @@ private:
     static constexpr float _diodeTerm = 2.0 * 0.0242;
     static constexpr float _piDivisor = 2.0 / juce::MathConstants<float>::pi;
 
-    float _sampleRate = 44100.0f;
+    float sampleRate = 44100.0f;
 
 
     DistModel model = DistModel::kHard;
 
-    juce::dsp::LinkwitzRileyFilter<float> _dcFilter;
+    juce::dsp::LinkwitzRileyFilter<float> dcFilter;
     StateVariableFilter<float> fuzzFilter;
     StateVariableFilter<float> lofiFilter;
 
